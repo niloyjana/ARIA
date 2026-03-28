@@ -1,95 +1,95 @@
-# 💰 ARIA — AI-Powered Financial Advisor
-### India's AI-powered personal finance advisor
+# 🌌 ARIA — The Smart AI Financial Advisor
+
+> **Status:** Premium UI/UX Overhaul Complete | **Local AI:** Integrated (Ollama)
+
+**ARIA** (formerly AI Money Mentor) is a professional-grade, privacy-first financial advisory platform. It combines the power of large language models (LLMs) with a structured financial framework to replace expensive human advisors with precision AI intelligence.
+
+![ARIA Dashboard Preview](https://github.com/niloyjana/aria.ai/blob/main/frontend/assets/preview.png?raw=true) *(Note: Add your actual screenshot here!)*
 
 ---
 
-## 📁 Project Structure
+## ✨ Key Features
+
+### 🏦 Specialized AI Toolsets
+- **🔥 FIRE Path Planner**: A complete roadmap to Financial Independence and Early Retirement.
+- **💯 Money Health Score**: 6-dimension wellness audit (Emergency fund, Life/Health Insurance, 80C, Debt).
+- **🧾 Tax Wizard**: Intelligence engine for Old vs New regime comparison and deduction discovery.
+- **💑 Couple's Money Planner**: Optimize HRA, NPS, and SIPs across joint households.
+- **🔬 Portfolio X-Ray**: Deep mutual fund analysis (Overlap, expense drag, rebalancing).
+- **🎯 Life Event Advisor**: Targeted advice for bonus, marriage, inheritance, or new babies.
+
+### 🛡️ Privacy-First Architecture
+Unlike general-purpose chatbots, ARIA is built for **Local AI Support**. Your sensitive financial data (Net Worth, Income, Goals) remains on your machine when using the **Ollama** backend.
+
+### 🎨 Premium "AI Product" Design
+- **Glassmorphism UI**: Frosted glass effects, glowing borders, and a deep purple-black palette.
+- **Responsive Sidebar**: Collapses into a sleek icon-rail with smart tooltips.
+- **Interactive Dashboard**: Modern SVG-based visuals and data-rich summary cards.
+- **Subtle Micro-animations**: Animated background particles and scroll-reveal effects.
+
+---
+
+## 🛠️ Project Structure
 
 ```
-money_mentor/
+aria.ai/
 ├── backend/
-│   └── server.py        ← FastAPI backend (Python)
+│   └── server.py        ← FastAPI logic & Financial Prompt Engineering
 ├── frontend/
-│   ├── index.html       ← Main webpage
-│   ├── css/style.css    ← Styling
+│   ├── index.html       ← Core Dashboard & Sidebar UI
+│   ├── css/style.css    ← Premium Design System (CSS3)
 │   └── js/
-│       ├── tools.js     ← Tool definitions
-│       └── main.js      ← App logic
-├── config.env           ← ⭐ PUT YOUR API KEY HERE
-├── requirements.txt
+│       ├── tools.js     ← Tool Form Definitions & Logic
+│       └── main.js      ← UI & Animation Controller
+├── config.env           ← AI Provider & Local Model Config
+├── requirements.txt     ← Python dependencies
 └── README.md
 ```
 
 ---
 
-## 🚀 Setup (Windows — 3 steps)
+## 🚀 Setup & Installation (3 Steps)
 
-### Step 1 — Install packages
-
-Open PowerShell in this folder and run:
-```
+### 1. Environment Setup
+Clone the repo and install the Python backend requirements:
+```powershell
 pip install -r requirements.txt
 ```
 
-### Step 2 — Add your API key
+### 2. Configure AI Provider
+Open `config.env` and choose your intelligence:
 
-Open `config.env` in Notepad.
+**Option A: Local AI (Recommended for Privacy)**
+1. Install [Ollama](https://ollama.com).
+2. Run `ollama run llama3.2:1b`.
+3. Set `AI_PROVIDER=local` in `config.env`.
 
-**For Google Gemini (free):**
-1. Go to https://aistudio.google.com → Sign in → "Get API Key"
-2. Set `AI_PROVIDER=gemini`
-3. Paste key next to `GEMINI_API_KEY=`
+**Option B: Groq (Cloud Fallback - Ultra Fast)**
+1. Get a key from [Groq Console](https://console.groq.com).
+2. Set `AI_PROVIDER=groq` and paste your `GROQ_API_KEY`.
 
-**For OpenAI:**
-1. Go to https://platform.openai.com/api-keys
-2. Set `AI_PROVIDER=openai`
-3. Paste key next to `OPENAI_API_KEY=`
-
-**For Groq (free & fast):**
-1. Go to https://console.groq.com
-2. Set `AI_PROVIDER=groq`
-3. Paste key next to `GROQ_API_KEY=`
-
-### Step 3 — Run it
-
-Open PowerShell in this folder:
-```
+### 3. Launch ARIA
+Start the FastAPI server:
+```powershell
+# Navigate to backend folder
 cd backend
 python server.py
 ```
-
-Then open your browser and go to:
-```
-http://localhost:8000
-```
-
-That's it! The frontend opens in your browser. ✅
+Visit **`http://localhost:8000`** in your browser.
 
 ---
 
-## 🤖 6 AI Tools
-
-| Tool | What it does |
-|------|-------------|
-| 🔥 FIRE Planner | Complete retirement roadmap with SIPs & asset allocation |
-| 💯 Money Health Score | 6-dimension financial wellness score |
-| 🎯 Life Event Advisor | Bonus, marriage, inheritance — what to do with money |
-| 🧾 Tax Wizard | Old vs new regime comparison + missed deductions |
-| 💑 Couple Planner | Optimize HRA, NPS, SIPs across both incomes |
-| 🔬 Portfolio X-Ray | MF overlap, expense drag, rebalancing plan |
+## 🧪 Tech Stack
+- **Backend**: Python 3.10+, FastAPI, Uvicorn.
+- **AI Engine**: Local LLMs (Ollama/Llama 3.2) or Cloud APIs (Groq).
+- **Frontend**: Vanilla HTML5, CSS3 (Custom Design System), JavaScript (ES6+).
+- **Animations**: CSS Keyframes, Intersection Observer API.
 
 ---
 
-## ❓ Troubleshooting
-
-**"pip is not recognized"** → Install Python from https://python.org (check "Add to PATH")
-
-**"Cannot find path requirements.txt"** → Make sure you're in the `money_mentor` folder, not inside `backend`
-
-**Page doesn't load** → Make sure `python server.py` is still running in PowerShell
-
-**AI gives error** → Check your API key is correctly pasted in `config.env`
+## ⚠️ Disclaimer
+ARIA is for educational and informational purposes only. It is not a SEBI-registered investment advisor. Always consult a qualified professional before making major financial decisions.
 
 ---
 
-⚠️ For educational purposes only. Not SEBI-registered investment advice.
+*Designed & Developed as a Premium AI Product Experiment.* 🌌
