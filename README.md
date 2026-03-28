@@ -24,11 +24,7 @@
 ### 🛡️ Privacy-First Architecture
 Unlike general-purpose chatbots, ARIA is built for **Local AI Support**. Your sensitive financial data (Net Worth, Income, Goals) remains on your machine when using the **Ollama** backend.
 
-### 🎨 Premium "AI Product" Design
-- **Glassmorphism UI**: Frosted glass effects, glowing borders, and a deep purple-black palette.
-- **Responsive Sidebar**: Collapses into a sleek icon-rail with smart tooltips.
-- **Interactive Dashboard**: Modern SVG-based visuals and data-rich summary cards.
-- **Subtle Micro-animations**: Animated background particles and scroll-reveal effects.
+
 
 ---
 
