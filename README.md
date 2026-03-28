@@ -4,7 +4,8 @@
 
 **ARIA** (formerly AI Money Mentor) is a professional-grade, privacy-first financial advisory platform. It combines the power of large language models (LLMs) with a structured financial framework to replace expensive human advisors with precision AI intelligence.
 
-![ARIA Dashboard Preview](https://github.com/niloyjana/aria.ai/blob/main/frontend/assets/preview.png?raw=true) *(Note: Add your actual screenshot here!)*
+![ARIA Dashboard Preview](https://github.com/niloyjana/aria.ai/blob/main/frontend/assets/preview.png?raw=true) <img width="1919" height="914" alt="image" src="https://github.com/user-attachments/assets/347d681f-ff28-4de7-8acd-d1a59c78ae85" />
+
 
 ---
 
