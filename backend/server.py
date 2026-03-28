@@ -174,12 +174,20 @@ Year-by-year net worth targets.
 
 Be specific with ₹ amounts and Indian product names.
 
-Use this format for charts when relevant (e.g., Asset Allocation, SIP Split):
+Use this format for charts when relevant:
+```chart-json
+{{
+  "type": "line",
+  "label": "Wealth Projection (₹ Lakhs)",
+  "data": {{ "Yr 1": 2, "Yr 5": 15, "Yr 10": 45, "Yr 15": 110, "Yr 20": 250 }}
+}}
+```
+Include a second pie chart for asset allocation.
 ```chart-json
 {{
   "type": "pie",
   "label": "Suggested Asset Allocation",
-  "data": {{ "Large Cap": 40, "Flexi Cap": 30, "Mid/Small": 20, "Debt": 10 }}
+  "data": {{ "Equity": 70, "Debt": 20, "Gold": 10 }}
 }}
 ```"""
 
@@ -332,13 +340,64 @@ Include a breakdown chart of current portfolio:
 ```chart-json
 {{
   "type": "pie",
-  "label": "Current Category Allocation",
-  "data": {{ "Large Cap": 50, "Mid Cap": 20, "Small Cap": 10, "Debt": 20 }}
+  "label": "Portfolio Sector Allocation",
+  "data": {{ "Technology": 30, "Finance": 25, "Healthcare": 15, "Consumer": 20, "Others": 10 }}
 }}
-```"""
+```
+If NAV data was provided in the input, use it to calculate exact growth gaps.
+"""
 
+
+# ── Market Sentiment Helper ──────────────────────────────────
+
+def fetch_market_data():
+    import requests
+    symbols = {"NIFTY 50": "%5ENSEI", "SENSEX": "%5EBSESN"}
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    results = []
+    total_pct = 0
+    
+    for name, sym in symbols.items():
+        try:
+            r = requests.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}", headers=headers, timeout=5)
+            data = r.json()['chart']['result'][0]['meta']
+            price = data['regularMarketPrice']
+            prev_close = data['chartPreviousClose']
+            change = price - prev_close
+            pct = (change / prev_close) * 100
+            total_pct += pct
+            results.append({
+                "name": name,
+                "price": f"{price:,.2f}",
+                "change": f"{change:+.2f}",
+                "percent": f"{pct:+.2f}%",
+                "trend": "up" if pct >= 0 else "down"
+            })
+        except:
+            results.append({"name": name, "price": "---", "change": "0.00", "percent": "0.00%", "trend": "neutral"})
+
+    # Calculate Sentiment based on average of Nifty and Sensex
+    import random
+    avg_pct = total_pct / 2
+    score = max(5, min(95, 50 + (avg_pct * 10) + random.uniform(-2, 2)))
+    
+    if score > 70: mood = "Greed"
+    elif score > 55: mood = "Optimistic"
+    elif score < 30: mood = "Extreme Fear"
+    elif score < 45: mood = "Fearful"
+    else: mood = "Neutral"
+
+    return {
+        "indices": results,
+        "mood": mood,
+        "score": int(score)
+    }
 
 # ── Endpoints ─────────────────────────────────────────────────
+
+@app.get("/api/market-mood")
+def market_mood():
+    return fetch_market_data()
 
 @app.get("/api/status")
 def status():

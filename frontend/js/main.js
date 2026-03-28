@@ -212,6 +212,29 @@ function buildForm(tool) {
   const fieldsHTML = tool.fields.map(f => {
     const spanClass = f.span ? " span2" : "";
     let input = "";
+    
+    // Header for form group (Label + organized Toolbar)
+    let toolbarActions = "";
+    if (f.type === "textarea" || f.key === "portfolio_text" || f.key === "goals") {
+      toolbarActions += `
+        <div class="voice-visualizer" id="wave-${f.key}">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <span class="voice-status-text">Recording...</span>
+        <button class="tool-btn voice-only-btn" onclick="startVoiceRecognition('field-${f.key}', event)" title="Voice Assistant">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+      `;
+    }
+    
+    if (f.key === "portfolio_text") {
+       toolbarActions += `
+        <button class="tool-btn sync-btn" onclick="fetchLiveNAVs(event)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+          <span>Sync NAVs</span>
+        </button>
+       `;
+    }
 
     if (f.type === "select") {
       const opts = f.options.map(o => `<option value="${o}">${o}</option>`).join("");
@@ -224,15 +247,25 @@ function buildForm(tool) {
       input = `<input type="number" id="field-${f.key}" placeholder="${f.placeholder || ""}" min="0" />`;
     }
 
-    return `<div class="form-group${spanClass}">
-      <label for="field-${f.key}">${f.label}</label>
+    return `<div class="form-group${spanClass}" id="group-${f.key}">
+      <div class="form-group-header">
+        <label for="field-${f.key}">${f.label}</label>
+        <div class="field-toolbar">${toolbarActions}</div>
+      </div>
       ${input}
     </div>`;
   }).join("");
 
   return `
-    <h2 style="color:${tool.color}">${tool.title}</h2>
-    <p class="subtitle">${tool.subtitle}</p>
+    <div class="modal-header-main">
+      <div class="modal-icon-box" style="--ic:${tool.color}; color:${tool.color}; stroke:${tool.color};">
+        ${tool.iconHTML || tool.icon || ""}
+      </div>
+      <div>
+        <h2 style="color:${tool.color}; margin:0;">${tool.title}</h2>
+        <p class="subtitle" style="margin:0;">${tool.subtitle}</p>
+      </div>
+    </div>
     <div id="info-bar" class="info-bar">💡 Fill in your details below</div>
     <div class="form-grid">${fieldsHTML}</div>
     <button class="submit-btn" id="submit-btn" onclick="submitTool()">
@@ -451,19 +484,23 @@ function initCharts() {
 
       const labels = Object.keys(config.data);
       const values = Object.values(config.data);
+      const type = config.type || 'pie';
       const colors = [
         '#a855f7', '#7c3aed', '#00CEC9', '#00B894', '#FDCB6E', '#E84393', '#FF6B35'
       ];
 
       new Chart(canvas, {
-        type: config.type || 'pie',
+        type: type,
         data: {
           labels: labels,
           datasets: [{
+            label: config.label || '',
             data: values,
-            backgroundColor: colors.slice(0, labels.length),
-            borderColor: 'rgba(255,255,255,0.1)',
-            borderWidth: 1
+            backgroundColor: type === 'line' ? 'rgba(168, 85, 247, 0.1)' : colors.slice(0, labels.length),
+            borderColor: type === 'line' ? '#a855f7' : 'rgba(255,255,255,0.1)',
+            borderWidth: type === 'line' ? 3 : 1,
+            fill: type === 'line',
+            tension: type === 'line' ? 0.4 : 0
           }]
         },
         options: {
@@ -471,6 +508,7 @@ function initCharts() {
           maintainAspectRatio: false,
           plugins: {
             legend: {
+              display: type !== 'line',
               position: 'bottom',
               labels: { color: '#F0EDE8', font: { family: 'DM Sans', size: 11 } }
             },
@@ -480,7 +518,18 @@ function initCharts() {
               color: '#F0EDE8',
               font: { family: 'Playfair Display', size: 16, weight: 'bold' }
             }
-          }
+          },
+          scales: type === 'line' || type === 'bar' ? {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } }
+            }
+          } : {}
         }
       });
     } catch (e) {
@@ -496,6 +545,197 @@ function initScores() {
       bar.style.width = percent + '%';
     }, 100);
   });
+}
+
+// ── Roadmap Feature: Voice Input ──────────────────────────────
+function startVoiceRecognition(targetId, event) {
+  event.preventDefault();
+  const btn = event.currentTarget;
+  const fieldKey = targetId.replace('field-', '');
+  const root = document.getElementById(`group-${fieldKey}`);
+  const wave = document.getElementById(`wave-${fieldKey}`);
+  
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  if (!SpeechRecognition) {
+    alert("Voice recognition is not supported in this browser. Please try Chrome.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-IN';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    root?.classList.add('is-recording');
+    wave?.classList.add('active');
+  };
+
+  recognition.onerror = () => {
+    root?.classList.remove('is-recording');
+    wave?.classList.remove('active');
+  };
+
+  recognition.onend = () => {
+    root?.classList.remove('is-recording');
+    wave?.classList.remove('active');
+  };
+
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    const input = document.getElementById(targetId);
+    if (input) {
+      input.value = (input.value ? input.value + " " : "") + transcript;
+      input.dispatchEvent(new Event('input'));
+    }
+  };
+
+  recognition.start();
+}
+
+// ── Roadmap Feature: PDF Export ───────────────────────────────
+async function downloadReportPDF() {
+  const btn = document.getElementById('pdf-btn');
+  const resultPanel = document.querySelector('.result-inner');
+  const originalText = btn.innerHTML;
+  
+  btn.disabled = true;
+  btn.innerHTML = `<span class="loading-dots"><span></span><span></span><span></span></span>`;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    
+    // Capture the result body (including charts) as a high-quality image
+    const canvas = await html2canvas(document.getElementById('result-body'), {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#100e1c'
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    // Header for PDF
+    pdf.setFillColor(16, 14, 28);
+    pdf.rect(0, 0, pdfWidth, 20, 'F');
+    pdf.setTextColor(168, 85, 247);
+    pdf.setFontSize(14);
+    pdf.text("ARIA AI ADVISOR REPORT", 10, 13);
+    
+    // Add the content image
+    pdf.addImage(imgData, 'PNG', 0, 20, pdfWidth, imgHeight);
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text("Generated by ARIA AI - For educational purposes only.", 10, pdfHeight - 10);
+
+    pdf.save(`ARIA_Report_${Date.now()}.pdf`);
+
+  } catch (err) {
+    console.error("PDF Export Error:", err);
+    alert("Could not generate PDF: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+// ── Roadmap Feature: Live MF NAV Fetch (mfapi.in) ─────────────
+async function fetchLiveNAVs(event) {
+  event.preventDefault();
+  const textarea = document.getElementById('field-portfolio_text');
+  if (!textarea || !textarea.value.trim()) {
+    alert("Please enter fund names first (e.g. Parag Parikh Flexi Cap)");
+    return;
+  }
+
+  const btn = event.currentTarget;
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = "Fetching...";
+
+  const lines = textarea.value.split("\n");
+  const newLines = [];
+
+  for (let line of lines) {
+    const fundName = line.split(/[—\-:]/)[0].trim();
+    if (!fundName) { newLines.push(line); continue; }
+
+    try {
+      // 1. Search for fund
+      const searchResp = await fetch(`https://api.mfapi.in/mf/search?q=${encodeURIComponent(fundName)}`);
+      const results = await searchResp.json();
+      
+      if (results && results.length > 0) {
+        const schemeCode = results[0].schemeCode;
+        // 2. Fetch latest NAV
+        const navResp = await fetch(`https://api.mfapi.in/mf/${schemeCode}/latest`);
+        const navData = await navResp.json();
+        
+        if (navData && navData.data && navData.data.length > 0) {
+          const latest = navData.data[0].nav;
+          const fullName = navData.meta.scheme_name;
+          newLines.push(`${fullName} — (NAV: ₹${latest})`);
+          continue;
+        }
+      }
+      newLines.push(line); // fallback
+    } catch (e) {
+      console.error("NAV Fetch error for:", fundName, e);
+      newLines.push(line);
+    }
+  }
+
+  textarea.value = newLines.join("\n");
+  textarea.dispatchEvent(new Event('input'));
+  btn.innerHTML = originalText;
+  btn.disabled = false;
+}
+
+// ── Roadmap Feature: Live Market Mood Meter ──────────────────
+async function updateMarketTicker() {
+  const ticker = document.getElementById('market-ticker');
+  if (!ticker) return;
+
+  try {
+    const resp = await fetch('/api/market-mood');
+    const data = await resp.json();
+    
+    const moodClass = data.mood.toLowerCase().includes('greed') || data.mood.toLowerCase().includes('optimistic') ? 'mood-greed' : 
+                      (data.mood.toLowerCase().includes('fear') ? 'mood-fear' : 'mood-neutral');
+
+    let indicesHTML = data.indices.map(idx => {
+      const trendClass = idx.trend === 'up' ? 'trend-up' : (idx.trend === 'down' ? 'trend-down' : '');
+      const trendIcon = idx.trend === 'up' ? '▲' : (idx.trend === 'down' ? '▼' : '');
+      return `
+        <div class="ticker-item">
+          <span class="ticker-label">${idx.name}</span>
+          <span class="ticker-value">${idx.price}</span>
+          <span class="ticker-value ${trendClass}" style="font-weight:300;">${trendIcon} ${idx.change} (${idx.percent})</span>
+        </div>
+      `;
+    }).join("");
+
+    ticker.innerHTML = `
+      ${indicesHTML}
+      <div class="ticker-item" style="margin-left: 15px;">
+        <span class="ticker-label">Mood</span>
+        <span class="ticker-mood-tag ${moodClass}" style="font-weight:900;">${data.mood}</span>
+      </div>
+      <button class="ticker-refresh-btn" onclick="updateMarketTicker()" title="Refresh Market Data">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+      </button>
+    `;
+  } catch (err) {
+    console.error("Ticker fetch error:", err);
+  }
 }
 
 
@@ -527,11 +767,11 @@ function attachCursorEvents() {
 function handleCursorEnter() { cursor?.classList.add("hover"); }
 function handleCursorLeave() { cursor?.classList.remove("hover"); }
 
-document.addEventListener("DOMContentLoaded", attachCursorEvents);
-
-// Listen for dynamic DOM updates (like tool modals opening) to attach cursor hover
-const observer = new MutationObserver(attachCursorEvents);
-observer.observe(document.body, { childList: true, subtree: true });
+document.addEventListener("DOMContentLoaded", () => {
+  attachCursorEvents();
+  updateMarketTicker();
+  setInterval(updateMarketTicker, 300000); // Update every 5 minutes
+});
 
 window.addEventListener("scroll", () => {
   const scrollPx = document.documentElement.scrollTop;
