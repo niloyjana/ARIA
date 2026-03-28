@@ -1396,6 +1396,68 @@ body, a, button, .tool-card, input, select, textarea, .modal-close, .nav-item {
   backdrop-filter: blur(2px);
 }
 
+/* ── Charts & Visualisations ────────────────────────────── */
+.chart-container {
+  position: relative;
+  margin: 24px auto;
+  width: 100%;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.score-card-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(168, 85, 247, 0.05);
+  border: 1px solid rgba(168, 85, 247, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.score-value-big {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+.score-label-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.score-bar-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.score-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  transition: width 1.5s cubic-bezier(.22, 1, .36, 1);
+}
+
+.score-good { color: #00B894; }
+.score-average { color: #FDCB6E; }
+.score-poor { color: #ff7675; }
+
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 900px) {
   /* On mobile, sidebar is hidden off-screen (no icon rail) */

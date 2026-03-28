@@ -4,10 +4,7 @@
 
 **ARIA** (formerly AI Money Mentor) is a professional-grade, privacy-first financial advisory platform. It combines the power of large language models (LLMs) with a structured financial framework to replace expensive human advisors with precision AI intelligence.
 
-<img width="1919" height="909" alt="image" src="https://github.com/user-attachments/assets/82b07939-cfe1-4cd8-9b60-06e26d8432d6" />
-
-<img width="1919" height="909" alt="image" src="https://github.com/user-attachments/assets/78ac14e2-a8c6-437a-b0cf-b1bee7cc6db1" />
-
+![ARIA Dashboard Preview](https://github.com/niloyjana/aria.ai/blob/main/frontend/assets/preview.png?raw=true) *(Note: Add your actual screenshot here!)*
 
 ---
 
@@ -24,7 +21,11 @@
 ### 🛡️ Privacy-First Architecture
 Unlike general-purpose chatbots, ARIA is built for **Local AI Support**. Your sensitive financial data (Net Worth, Income, Goals) remains on your machine when using the **Ollama** backend.
 
-
+### 🎨 Premium "AI Product" Design
+- **Glassmorphism UI**: Frosted glass effects, glowing borders, and a deep purple-black palette.
+- **Responsive Sidebar**: Collapses into a sleek icon-rail with smart tooltips.
+- **Interactive Dashboard**: Modern SVG-based visuals and data-rich summary cards.
+- **Subtle Micro-animations**: Animated background particles and scroll-reveal effects.
 
 ---
 

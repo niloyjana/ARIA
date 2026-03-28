@@ -172,7 +172,16 @@ Target = 6 months expenses. Where to park it.
 ## 5-Year Milestones
 Year-by-year net worth targets.
 
-Be specific with ₹ amounts and Indian product names."""
+Be specific with ₹ amounts and Indian product names.
+
+Use this format for charts when relevant (e.g., Asset Allocation, SIP Split):
+```chart-json
+{{
+  "type": "pie",
+  "label": "Suggested Asset Allocation",
+  "data": {{ "Large Cap": 40, "Flexi Cap": 30, "Mid/Small": 20, "Debt": 10 }}
+}}
+```"""
 
 def health_prompt(r):
     em = r.emergency_fund / (r.monthly_income * 0.6) if r.monthly_income else 0
@@ -197,7 +206,19 @@ Score each 0-100:
 ## Top 3 Immediate Actions
 ## Quick Wins (This Week)
 
-Use Indian benchmarks. Be specific with ₹ gaps."""
+Use Indian benchmarks. Be specific with ₹ gaps.
+
+IMPORTANT: Start your response with the Overall Score in this exact format:
+[85]/100: Overall Money Health Score
+
+Also include a breakdown chart:
+```chart-json
+{{
+  "type": "bar",
+  "label": "Health Dimensions",
+  "data": {{ "Emergency": 80, "Insurance": 60, "Investments": 70, "Debt": 90, "Tax": 50 }}
+}}
+```"""
 
 def life_event_prompt(r):
     return f"""You are India's top financial advisor for life events.
@@ -215,7 +236,16 @@ Existing Portfolio: ₹{r.existing_portfolio:,.0f}
 ## Common Mistakes to Avoid
 ## 6-Month Roadmap
 
-Be specific to Indian tax laws FY2024-25."""
+Be specific to Indian tax laws FY2024-25.
+
+Include an allocation chart:
+```chart-json
+{{
+  "type": "pie",
+  "label": "Money Allocation Plan",
+  "data": {{ "Emergency": 20, "Long-term": 50, "Short-term": 30 }}
+}}
+```"""
 
 def tax_prompt(r):
     annual = r.basic_salary_monthly * 12
@@ -242,7 +272,16 @@ Show full tax calculation with final tax liability for both.
 ## Tax-Saving Products Ranked
 | Product | Invest (₹) | Tax Saved (₹) | Lock-in | Risk |
 
-## March-End Checklist"""
+## March-End Checklist
+
+Include a comparison chart:
+```chart-json
+{{
+  "type": "bar",
+  "label": "Tax Liability Comparison (₹)",
+  "data": {{ "Old Regime": 125000, "New Regime": 95000 }}
+}}
+```"""
 
 def couple_prompt(r):
     combined = r.p1_monthly_income + r.p2_monthly_income
@@ -287,7 +326,16 @@ SIP: ₹{r.monthly_sip:,.0f}/mo | Horizon: {r.investment_horizon} | Risk: {r.ris
 🔴 EXIT | 🟡 REDUCE | 🟢 INCREASE | ➕ ADD
 
 ## Projected Corpus at {r.investment_horizon}
-Conservative / Moderate / Optimistic CAGR scenarios"""
+Conservative / Moderate / Optimistic CAGR scenarios
+
+Include a breakdown chart of current portfolio:
+```chart-json
+{{
+  "type": "pie",
+  "label": "Current Category Allocation",
+  "data": {{ "Large Cap": 50, "Mid Cap": 20, "Small Cap": 10, "Debt": 20 }}
+}}
+```"""
 
 
 # ── Endpoints ─────────────────────────────────────────────────

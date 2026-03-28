@@ -284,6 +284,12 @@ async function submitTool() {
     closeToolModal();
     showResult(tool.title, data.advice);
 
+    // After rendering markdown, initialize charts and scores
+    setTimeout(() => {
+      initCharts();
+      initScores();
+    }, 100);
+
   } catch (err) {
     showResult("❌ Error", `${err.message}\n\nMake sure the backend is running:\n\n  cd backend\n  python server.py`);
   } finally {
@@ -295,10 +301,24 @@ async function submitTool() {
 
 // ── Show Result ───────────────────────────────────────────────
 function showResult(title, text) {
+  const resultBody = document.getElementById("result-body");
   document.getElementById("result-title").textContent = title;
-  document.getElementById("result-body").innerHTML = renderMarkdown(text);
+  resultBody.innerHTML = renderMarkdown(text);
   document.getElementById("result-panel").classList.remove("hidden");
   document.body.style.overflow = "hidden";
+
+  // Trigger KaTeX rendering for math formulas
+  if (window.renderMathInElement) {
+    window.renderMathInElement(resultBody, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\[", right: "\\]", display: true },
+        { left: "\\(", right: "\\)", display: false }
+      ],
+      throwOnError: false
+    });
+  }
 }
 
 function closeResult() {
@@ -310,7 +330,25 @@ function closeResult() {
 // ── Markdown Renderer ─────────────────────────────────────────
 function renderMarkdown(text) {
   if (!text) return "";
-  const lines = text.split("\n");
+
+  // Handle block math \[ ... \] separately to avoid <p> wrapping line by line
+  let processedText = text;
+  const mathBlocks = [];
+  processedText = processedText.replace(/\\\[([\s\S]*?)\\\]/g, (match) => {
+    const placeholder = `__MATH_BLOCK_${mathBlocks.length}__`;
+    mathBlocks.push(match);
+    return "\n" + placeholder + "\n";
+  });
+
+  // Extract Chart JSON blocks: ```chart-json ... ``` OR `chart-json ... `
+  const chartBlocks = [];
+  processedText = processedText.replace(/(?:```|`)chart-json([\s\S]*?)(?:```|`)/g, (match, content) => {
+    const placeholder = `__CHART_BLOCK_${chartBlocks.length}__`;
+    chartBlocks.push(content.trim());
+    return "\n" + placeholder + "\n";
+  });
+
+  const lines = processedText.split("\n");
   let html = "";
   let inTable = false;
   let tableRows = [];
@@ -333,13 +371,51 @@ function renderMarkdown(text) {
   }
 
   lines.forEach(line => {
+    const t = line.trim();
+    if (!t) {
+      if (inTable) flushTable();
+      html += "<br>";
+      return;
+    }
+
     if ((line.includes("|") && line.trim().startsWith("|")) || inTable) {
       if (line.includes("|")) { inTable = true; tableRows.push(line); return; }
     }
     if (inTable) flushTable();
 
-    const t = line.trim();
-    if (!t) { html += "<br>"; return; }
+    if (t.startsWith("__MATH_BLOCK_") && t.endsWith("__")) {
+      const index = parseInt(t.replace("__MATH_BLOCK_", "").replace("__", ""));
+      html += `<div class="math-block">${mathBlocks[index]}</div>`;
+      return;
+    }
+
+    if (t.startsWith("__CHART_BLOCK_") && t.endsWith("__")) {
+      const index = parseInt(t.replace("__CHART_BLOCK_", "").replace("__", ""));
+      html += `<div class="chart-container"><canvas id="chart-canvas-${index}" data-chart='${chartBlocks[index]}'></canvas></div>`;
+      return;
+    }
+
+    // Handle Score Visualization: [X]/100 or X/100 or [X]/10 or X/10
+    // Matches: [85]/100, 85/100, Score: 85/100, etc.
+    const scoreMatch = t.match(/(?:\[?\b(\d+)\b\]?)\/(100|10)/);
+    if (scoreMatch) {
+      const score = parseInt(scoreMatch[1]);
+      const max = parseInt(scoreMatch[2]);
+      const percent = max === 10 ? score * 10 : score;
+      const colorClass = percent >= 80 ? 'score-good' : (percent >= 50 ? 'score-average' : 'score-poor');
+      const label = t.replace(scoreMatch[0], "").replace(/[:#]/g, "").trim();
+
+      html += `
+        <div class="score-card-visual">
+          <div class="score-label-sub">${label || 'Score'}</div>
+          <div class="score-value-big ${colorClass}">${score}<small style="font-size:0.4em; color:var(--text-muted)">/${max}</small></div>
+          <div class="score-bar-container">
+            <div class="score-bar-fill" data-percent="${percent}"></div>
+          </div>
+        </div>
+      `;
+      return;
+    }
 
     if (/^## /.test(t)) { html += `<h2>${inlineFormat(t.replace(/^## /, ""))}</h2>`; return; }
     if (/^### /.test(t)) { html += `<h3>${inlineFormat(t.replace(/^### /, ""))}</h3>`; return; }
@@ -364,6 +440,62 @@ function inlineFormat(text) {
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/`(.+?)`/g, "<code>$1</code>")
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+}
+
+// ── Visualization Helpers ─────────────────────────────────────
+function initCharts() {
+  document.querySelectorAll('canvas[id^="chart-canvas-"]').forEach(canvas => {
+    try {
+      const rawData = canvas.getAttribute('data-chart');
+      const config = JSON.parse(rawData);
+
+      const labels = Object.keys(config.data);
+      const values = Object.values(config.data);
+      const colors = [
+        '#a855f7', '#7c3aed', '#00CEC9', '#00B894', '#FDCB6E', '#E84393', '#FF6B35'
+      ];
+
+      new Chart(canvas, {
+        type: config.type || 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors.slice(0, labels.length),
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#F0EDE8', font: { family: 'DM Sans', size: 11 } }
+            },
+            title: {
+              display: !!config.label,
+              text: config.label,
+              color: '#F0EDE8',
+              font: { family: 'Playfair Display', size: 16, weight: 'bold' }
+            }
+          }
+        }
+      });
+    } catch (e) {
+      console.error("Chart Init Error:", e, canvas.getAttribute('data-chart'));
+    }
+  });
+}
+
+function initScores() {
+  document.querySelectorAll('.score-bar-fill').forEach(bar => {
+    const percent = bar.getAttribute('data-percent');
+    setTimeout(() => {
+      bar.style.width = percent + '%';
+    }, 100);
+  });
 }
 
 

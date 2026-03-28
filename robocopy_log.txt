@@ -1,0 +1,49 @@
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : 28 March 2026 18:47:55
+   Source : C:\Users\LENOVO\.ollama\models\
+     Dest : D:\ollama_models\
+
+    Files : *.*
+	    
+  Options : *.* /V /TS /FP /NDL /S /E /DCOPY:DA /COPY:DAT /MOVE /NP /R:1000000 /W:30 
+
+------------------------------------------------------------------------------
+
+	    New File  		 608.1 m 2026/03/28 13:04:04	C:\Users\LENOVO\.ollama\models\blobs\sha256-2af3b81862c6be03c769683af18efdadb2c33f60ff32ab6f83e42c043d6c7816-partial
+	    New File  		      50 2026/03/28 13:00:29	C:\Users\LENOVO\.ollama\models\blobs\sha256-2af3b81862c6be03c769683af18efdadb2c33f60ff32ab6f83e42c043d6c7816-partial-0
+	    New File  		      58 2026/03/28 13:00:29	C:\Users\LENOVO\.ollama\models\blobs\sha256-2af3b81862c6be03c769683af18efdadb2c33f60ff32ab6f83e42c043d6c7816-partial-1
+	    New File  		      58 2026/03/28 13:00:29	C:\Users\LENOVO\.ollama\models\blobs\sha256-2af3b81862c6be03c769683af18efdadb2c33f60ff32ab6f83e42c043d6c7816-partial-2
+	    New File  		      58 2026/03/28 13:00:29	C:\Users\LENOVO\.ollama\models\blobs\sha256-2af3b81862c6be03c769683af18efdadb2c33f60ff32ab6f83e42c043d6c7816-partial-3
+	    New File  		      58 2026/03/28 13:00:29	C:\Users\LENOVO\.ollama\models\blobs\sha256-2af3b81862c6be03c769683af18efdadb2c33f60ff32ab6f83e42c043d6c7816-partial-4
+	    New File  		      58 2026/03/28 13:00:29	C:\Users\LENOVO\.ollama\models\blobs\sha256-2af3b81862c6be03c769683af18efdadb2c33f60ff32ab6f83e42c043d6c7816-partial-5
+	    New File  		      64 2026/03/28 13:00:59	C:\Users\LENOVO\.ollama\models\blobs\sha256-2af3b81862c6be03c769683af18efdadb2c33f60ff32ab6f83e42c043d6c7816-partial-6
+	    New File  		     485 2026/03/28 09:49:39	C:\Users\LENOVO\.ollama\models\blobs\sha256-3f8eb4da87fa7a3c9da615036b0dc418d31fef2a30b115ff33562588b32c691d
+	    New File  		     485 2026/03/28 10:00:19	C:\Users\LENOVO\.ollama\models\blobs\sha256-4f659a1e86d7f5a33c389f7991e7224b7ee6ad0358b53437d54c02d2e1b1118d
+	    New File  		   12403 2026/03/28 09:49:33	C:\Users\LENOVO\.ollama\models\blobs\sha256-4fa551d4f938f68b8c1e6afa9d28befb70e3f33f75d0753248d530364aeea40f
+	    New File  		     110 2026/03/28 09:49:37	C:\Users\LENOVO\.ollama\models\blobs\sha256-577073ffcc6ce95b9981eacc77d1039568639e5638e83044994560d9ef82ce1b
+	    New File  		   4.3 g 2026/03/28 09:49:16	C:\Users\LENOVO\.ollama\models\blobs\sha256-6a0746a1ec1aef3e7ec53868f220ff6e389f6f8ef87a01d77c96807de94ca2aa
+	    New File  		   1.2 g 2026/03/28 10:00:12	C:\Users\LENOVO\.ollama\models\blobs\sha256-74701a8c35f6c8d9a4b91f3f3497643001d63e0c7a84e085bed452548fa88d45
+	    New File  		     254 2026/03/28 09:49:35	C:\Users\LENOVO\.ollama\models\blobs\sha256-8ab4849b038cf0abc5b1c9b8ee1443dca6b93a045c2272180d985126eb40bf6f
+	    New File  		    1429 2026/03/28 10:00:13	C:\Users\LENOVO\.ollama\models\blobs\sha256-966de95ca8a62200913e3f8bfbf84c8494536f1b94b49166851e76644e966396
+	    New File  		    6016 2026/03/28 10:00:17	C:\Users\LENOVO\.ollama\models\blobs\sha256-a70ff7e570d97baaf4e62ac6e6ad9975e04caa6d900d3742d37698494479e0cd
+	    New File  		    7711 2026/03/28 10:00:15	C:\Users\LENOVO\.ollama\models\blobs\sha256-fcc5a6bec9daf9b561a68827b67ab6088e1dba9d1fa2a50d7bbcc8384e0a265d
+	    New File  		     858 2026/03/28 09:49:52	C:\Users\LENOVO\.ollama\models\manifests\registry.ollama.ai\library\llama3\latest
+	    New File  		     860 2026/03/28 10:00:23	C:\Users\LENOVO\.ollama\models\manifests\registry.ollama.ai\library\llama3.2\1b
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :         7         6         1         0         0         0
+   Files :        20        20         0         0         0         0
+   Bytes :   6.165 g   6.165 g         0         0         0         0
+   Times :   0:00:22   0:00:22                       0:00:00   0:00:00
+
+
+   Speed :           29,13,35,852 Bytes/sec.
+   Speed :             16,670.371 MegaBytes/min.
+   Ended : 28 March 2026 18:48:18
+
