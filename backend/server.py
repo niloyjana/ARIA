@@ -101,6 +101,9 @@ async def ask_ai(prompt: str) -> str:
                 return data["choices"][0]["message"]["content"]
         except Exception as e:
             print(f"❌ AI connection error: {str(e)}")
+            # Graceful Fallback for Demo Mode
+            if "401" in str(e) or "403" in str(e) or "404" in str(e):
+                 return "🌙 **ARIA Demo Node**: I'm currently in offline mode. Please ensure the `GROQ_API_KEY` is set in your Vercel environment variables to unlock my full financial intelligence!"
             raise HTTPException(500, f"AI advice generation failed: {str(e)}")
     elif provider == "local":
         import asyncio
