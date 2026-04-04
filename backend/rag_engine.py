@@ -7,11 +7,18 @@ import os
 from pathlib import Path
 from typing import List, Optional
 import PyPDF2
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_core.documents import Document
 from datetime import datetime
+
+# ── Feature Guard (Heavy ML libs) ───────────────────────────
+_RAG_AVAILABLE = True
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_community.vectorstores import FAISS
+    from langchain_core.documents import Document
+except ImportError:
+    _RAG_AVAILABLE = False
+    print("⚠️ RAG dependencies (FAISS/LangChain) not found. Document analysis disabled.")
 
 # ── Configuration ─────────────────────────────────────────────
 ROOT = Path(__file__).parent.parent
@@ -23,6 +30,7 @@ _embeddings = None
 
 def get_embeddings():
     global _embeddings
+    if not _RAG_AVAILABLE: return None
     if _embeddings is None:
         print("📥 Initializing AI Embeddings (all-MiniLM-L6-v2)...")
         _embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -35,6 +43,7 @@ class RAGEngine:
 
     def _ensure_initialized(self):
         """Lazy load the store and embeddings only when needed."""
+        if not _RAG_AVAILABLE: return
         if not self._initialized:
             self.load_store()
             self._initialized = True
@@ -60,6 +69,8 @@ class RAGEngine:
 
     def process_document(self, file_path: str, file_name: str) -> str:
         """Read PDF/Text, split, and add to vector store."""
+        if not _RAG_AVAILABLE:
+            return "Document analysis is disabled in this environment (Vercel)."
         self._ensure_initialized()
         content = ""
         if file_path.endswith(".pdf"):
@@ -91,6 +102,7 @@ class RAGEngine:
 
     def query(self, text: str, k: int = 4) -> str:
         """Retrieve relevant context for a query."""
+        if not _RAG_AVAILABLE: return ""
         self._ensure_initialized()
         if not self.vector_store:
             return ""
@@ -101,6 +113,7 @@ class RAGEngine:
 
     def store_interaction(self, user_id: str, message: str, response: str):
         """Store a chat interaction as a memory document for future retrieval."""
+        if not _RAG_AVAILABLE: return
         self._ensure_initialized()
         
         # 1. Check for memory bloat (limit memory documents)
