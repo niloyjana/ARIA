@@ -10,7 +10,8 @@
 **A professional-grade, privacy-first AI financial advisory platform built for the modern individual.** 
 *Combining the power of Large Language Models (LLMs) with comprehensive financial frameworks to deliver precision, personalized intelligence.*
 
-![ARIA Dashboard Preview](https://github.com/niloyjana/ARIA/blob/main/frontend/assets/preview.png?raw=true) *(Note: Replace with your actual project screenshot)*
+
+<img width="1918" height="908" alt="Screenshot 2026-04-04 222211" src="https://github.com/user-attachments/assets/1d594308-b108-4141-a386-49adc75e71cd" />
 
 </div>
 
@@ -42,8 +43,12 @@ ARIA provides a suite of specialized calculators and advisors, accessible via a 
 - **Responsive Dynamic Sidebar:** Collapses gracefully into a sleek SVG icon-rail with intelligent tooltips to maximize workspace density.
 - **Modern Interactions:** Smooth CSS-driven micro-animations, animated background particles, and scroll-reveal elements ensuring a fluid user experience.
 
----
 
+<img width="1919" height="909" alt="Screenshot 2026-04-04 224533" src="https://github.com/user-attachments/assets/0ebcbe40-e2f0-42ae-ab4b-31dda189b623" />
+
+<img width="1919" height="891" alt="Screenshot 2026-04-04 224331" src="https://github.com/user-attachments/assets/f4711140-a3b0-4fc8-9e22-6c2f5f4d3da1" />
+
+---
 ## 🛠️ Project Structure
 
 Clean separation of frontend interface and backend intelligent routing:
@@ -133,8 +138,4 @@ Open up **`http://localhost:8000`** in your browser and start planning your fina
 
 **ARIA is designed strictly for educational and informational purposes.** It operates on probabilistic LLMs and is **not** a SEBI-registered investment advisor or a certified financial planner. Always consult a qualified, registered financial professional before making major investment, tax, or life decisions based on AI-generated advice.
 
----
 
-<div align="center">
-  <i>Designed & Developed as a Premium AI Product Experiment.</i> 🌌
-</div>
