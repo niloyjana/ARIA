@@ -18,9 +18,13 @@ const DEFAULT_TRANSACTIONS = [
 
 const appState = {
   // ── Persistent Data ──────────────────────────────────
-  transactions: (localStorage.getItem('aria-transactions') === null && localStorage.getItem('aria-data-wiped') !== 'true') 
-                ? [...DEFAULT_TRANSACTIONS] 
-                : JSON.parse(localStorage.getItem('aria-transactions') || "[]"),
+  transactions: (() => {
+    const saved = localStorage.getItem('aria-transactions');
+    const wiped = localStorage.getItem('aria-data-wiped') === 'true';
+    if (wiped) return [];
+    if (!saved || saved === '[]') return [...DEFAULT_TRANSACTIONS];
+    try { return JSON.parse(saved); } catch(e) { return [...DEFAULT_TRANSACTIONS]; }
+  })(),
   activeRole: localStorage.getItem('aria-role') || 'viewer', // 'admin' or 'viewer'
   dataWiped: localStorage.getItem('aria-data-wiped') === 'true',
   
