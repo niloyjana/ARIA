@@ -3681,8 +3681,8 @@ button[onclick="Transactions.wipeAll()"]:hover {
   .ingestion-grid { grid-template-columns: 1fr; }
 }
 
-/* 📱 Mobile Responsiveness Overrides (768px and below) */
-@media (max-width: 768px) {
+/* 📱 Mobile Responsiveness Overrides (900px and below) */
+@media (max-width: 900px) {
   :root {
     --sidebar-width: 100%;
     --radius: 12px;

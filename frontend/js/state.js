@@ -149,10 +149,17 @@ const appState = {
         const response = await fetch('/api/data/processed');
         const result = await response.json();
         if (response.ok && result.data) {
-            this.transactions = result.data;
-            if (result.data.length > 0) this.dataWiped = false; // Reset wiped flag if real data arrives
-            this.persistState();
-            console.log(`🏦 State synchronized with backend: ${result.data.length} records.`);
+            // ONLY overwrite local data if backend has something, 
+            // OR if the user explicitly wiped it (preventing empty server from killing mock data)
+            if (result.data.length > 0) {
+                this.transactions = result.data;
+                this.dataWiped = false;
+                this.persistState();
+            } else if (this.dataWiped) {
+                this.transactions = [];
+                this.persistState();
+            }
+            console.log(`🏦 Sync Check: Backend has ${result.data.length} records.`);
             return true;
         }
     } catch (e) {
