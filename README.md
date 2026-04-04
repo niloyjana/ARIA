@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌌 ARIA <br> <span style="font-size: 0.6em; color: gray;">The Smart AI Financial Advisor</span>
+# 🌌 ARIA <br> <span style="font-size: 0.6em; color: gray;">The Smart Multi-Agent AI Financial Advisor v3.0</span>
 
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 [![Backend](https://img.shields.io/badge/Backend-FastAPI-009688.svg?logo=fastapi)]()
@@ -37,6 +37,8 @@ ARIA provides a suite of specialized calculators and advisors, accessible via a 
 - **💑 Couple's Planner:** Co-manage household finances. Optimize joint HRA, NPS distributions, and concurrent SIPs.
 - **🔬 Portfolio X-Ray:** Deep mutual fund and equity analysis covering overlap risks, expense ratio drag, and custom rebalancing alerts.
 - **🎯 Life Event Advisor:** Hyper-targeted guidance for massive life milestones (receiving a bonus, marriage, inheritance, having a child).
+- **🕵️ Multi-Agent Intelligence (v3.0):** A coordinated reasoning chain where specialized agents (Auditor, Market Specialist, Manager) collaborate to audit your documents and formulate strategic advice.
+- **📊 Financial Insights:** Automated pattern discovery across your transactions with month-over-month trend analysis and spending rankings.
 
 ### 🎨 Premium "AI Product" UI/UX
 - **Glassmorphism Aesthetic:** Stunning frosted glass effects, glowing interactive borders, and a sophisticated deep purple-black palette.
@@ -56,19 +58,22 @@ Clean separation of frontend interface and backend intelligent routing:
 ```text
 ARIA/
 ├── backend/
-│   ├── server.py        # FastAPI logic, endpoints, & Financial Prompt Engineering
+│   ├── server.py              # FastAPI logic & API endpoints
+│   ├── agents_orchestrator.py # Multi-Agent reasoning engine
+│   ├── rag_engine.py          # Vector store & RAG retrieval
+│   ├── database.py            # SQLite state persistence
 │   └── ...
 ├── frontend/
-│   ├── index.html       # Core Dashboard Layout & Sidebar Framework
+│   ├── index.html             # Core Dashboard Layout & Navigation
 │   ├── css/
-│   │   └── style.css    # Premium Custom Design System (CSS3)
+│   │   └── style.css          # Premium Custom Design System (CSS3)
 │   ├── js/
-│   │   ├── tools.js     # Tool Configurations, DOM Structures & SVG injection
-│   │   └── main.js      # Global UI Controller, API integration & Animations
-│   └── assets/          # Static assets, local icons, screenshots
-├── config.env           # Environment Variables (Keys, AI Provider Config)
-├── requirements.txt     # Python backend dependencies
-├── start.py             # Global execution script
+│   │   ├── main.js            # UI Controller & SPA Router
+│   │   ├── transactions.js    # Ledger & Analysis Logic
+│   │   └── ...
+├── config.env                 # Environment Variables
+├── requirements.txt           # Dependency Manifest
+├── start.py                   # Bootstrapper
 └── README.md
 ```
 

@@ -116,7 +116,7 @@ function showView(viewName) {
   if (navItem) navItem.classList.add("active");
 
   // Re-run UI refresh for dynamic views
-  if (viewName === "dashboard" || viewName === "transactions") {
+  if (viewName === "dashboard" || viewName === "transactions" || viewName === "insights") {
     if (typeof Transactions !== 'undefined') Transactions.refreshUI();
   }
 

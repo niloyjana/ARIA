@@ -71,6 +71,16 @@ const Transactions = {
                     ${t.type === 'income' ? '+' : '-'}₹${t.amount.toLocaleString('en-IN')}
                 </td>
                 <td><span class="txn-type-badge type-${t.type}">${t.type}</span></td>
+                <td>
+                    <button
+                        id="edit-btn-${t.id}"
+                        onclick="Transactions.openEditModal('${t.id}')"
+                        title="Edit transaction"
+                        style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.2);padding:4px 8px;border-radius:6px;transition:color 0.2s;font-size:13px;line-height:1;"
+                        onmouseenter="this.style.color='#a855f7'"
+                        onmouseleave="this.style.color='rgba(255,255,255,0.2)'"
+                    >&#x270E;</button>
+                </td>
                 <td><button onclick="Transactions.deleteTransaction('${t.id}')" title="Delete transaction" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.2);padding:4px 8px;border-radius:6px;transition:color 0.2s;font-size:14px;line-height:1;" onmouseenter="this.style.color='#ef4444'" onmouseleave="this.style.color='rgba(255,255,255,0.2)'">&#x2715;</button></td>
             </tr>
         `).join('');
@@ -111,6 +121,14 @@ const Transactions = {
         const monthlyCtx = document.getElementById('chart-monthly-trends');
         const categoryCtx = document.getElementById('chart-category-breakdown');
         if (!monthlyCtx || !categoryCtx) return;
+
+        if (appState.transactions.length === 0) {
+            if (this.monthlyChartInstance)  { this.monthlyChartInstance.destroy();  this.monthlyChartInstance  = null; }
+            if (this.categoryChartInstance) { this.categoryChartInstance.destroy(); this.categoryChartInstance = null; }
+            monthlyCtx.parentElement.innerHTML  = '<div style="height:300px;display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);font-size:14px;">No transactions yet — import a CSV or add one manually</div>';
+            categoryCtx.parentElement.innerHTML = '<div style="height:300px;display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);font-size:14px;">No spending data to display</div>';
+            return;
+        }
 
         if (this.monthlyChartInstance) this.monthlyChartInstance.destroy();
         if (this.categoryChartInstance) this.categoryChartInstance.destroy();
@@ -206,6 +224,10 @@ const Transactions = {
 
         const nav = document.getElementById('role-switcher-nav');
         isAdmin ? nav?.classList.add('is-admin') : nav?.classList.remove('is-admin');
+
+        document.querySelectorAll('[id^="edit-btn-"]').forEach(btn => {
+            btn.style.display = isAdmin ? 'inline-block' : 'none';
+        });
     },
 
     getChartOptions() {
@@ -335,7 +357,8 @@ const Transactions = {
                 const response = await fetch('/api/data/transactions', { method: 'DELETE' });
                 if (response.ok) {
                     localStorage.removeItem('aria-transactions');
-                    console.log("🗑️ Ledger wiped from backend.");
+                    appState.transactions = [];
+                    console.log("🗑️ Ledger wiped from backend and localStorage.");
                     await this.refreshUI();
                     this.populateCategories();
                     alert("Ledger cleared.");
@@ -344,6 +367,57 @@ const Transactions = {
                 console.error("❌ Failed to wipe ledger:", e);
             }
         }
+    },
+
+    openEditModal(id) {
+        const t = appState.transactions.find(tx => String(tx.id) === String(id));
+        if (!t) return;
+
+        const tool = {
+            title: "Edit Transaction",
+            subtitle: "Update this entry in your ledger",
+            color: "#a855f7",
+            btnText: "Save Changes",
+            fields: [
+                { key: "description", label: "Description", type: "text",   placeholder: "e.g. Starbucks" },
+                { key: "amount",      label: "Amount (₹)",  type: "number", placeholder: "0" },
+                { key: "category",    label: "Category",    type: "select",
+                    options: ["Food & Dining","Rent","Salary","Investment","Shopping","Health","Entertainment","Transport","Others"] },
+                { key: "type",        label: "Type",        type: "select", options: ["expense","income"] },
+                { key: "date",        label: "Date",        type: "text",   placeholder: "YYYY-MM-DD" }
+            ]
+        };
+
+        currentTool = 'edit-txn-' + id;
+        document.getElementById("modal-content").innerHTML = buildForm(tool);
+        document.getElementById("modal-overlay").classList.remove("hidden");
+
+        document.getElementById("field-description").value = t.description || t.asset_name || "";
+        document.getElementById("field-amount").value      = t.amount;
+        document.getElementById("field-category").value   = t.category;
+        document.getElementById("field-type").value        = t.type;
+        document.getElementById("field-date").value        = t.date;
+
+        document.getElementById("submit-btn").onclick = () => {
+            const updated = {
+                ...t,
+                description: document.getElementById("field-description").value,
+                amount:      parseFloat(document.getElementById("field-amount").value) || 0,
+                category:    document.getElementById("field-category").value,
+                type:        document.getElementById("field-type").value,
+                date:        document.getElementById("field-date").value,
+            };
+
+            const idx = appState.transactions.findIndex(tx => String(tx.id) === String(id));
+            if (idx !== -1) {
+                appState.transactions[idx] = updated;
+                appState.persistState();
+            }
+
+            closeToolModal();
+            Transactions.refreshUI();
+            Transactions.populateCategories();
+        };
     }
 };
 

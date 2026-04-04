@@ -23,6 +23,7 @@ from database               import init_db
 from calculators.networth   import calculate_networth, get_networth_trend
 from services.market_data_service import market_service
 from services.ingestion_service   import ingestion_service
+from agents_orchestrator        import AgentOrchestrator
 
 init_db()
 
@@ -114,6 +115,9 @@ async def ask_ai(prompt: str) -> str:
             
         return await asyncio.to_thread(call_sync)
     raise HTTPException(500, f"Unknown AI_PROVIDER: {provider}")
+
+# ── Multi-Agent Workforce ───────────────────────────────────────────────────
+orchestrator = AgentOrchestrator(ask_ai)
 
 
 # ── Request Models ────────────────────────────────────────────────────────────
@@ -620,27 +624,21 @@ async def advisor_chat(r: AdvisorChatRequest):
     # 1. Retrieve Context from RAG (includes previous interactions)
     context = engine.query(r.message)
     
-    # 2. Build Prompt
-    prompt = f"""You are ARIA, the ultimate AI Financial Advisor.
-CONTEXT FROM DOCUMENTS AND PREVIOUS CHATS:
----
-{context}
----
-USER'S CURRENT REQUEST: {r.message}
-
-MISSION: Provide professional, accurate, and empathetic financial advice. 
-- Use the provided context to remember previous conversations.
-- If context is missing, use your general expertise (NIFTY, 80C, etc.).
-- Keep response clean with Markdown.
-"""
+    # 2. Fetch Live Market Context
+    try:
+        market_mood = await get_market_mood()
+    except:
+        market_mood = {"mood": "Neutral", "indices": []}
     
-    # 3. Ask AI
-    response = await ask_ai(prompt)
+    # 3. ACTIVATE Multi-Agent Workforce (Auditor -> MarketIntel -> Manager)
+    try:
+        response = await orchestrator.run_chat_workflow(r.message, context, market_mood)
+    except Exception as e:
+        print(f"❌ Workforce error: {e}")
+        # Fallback to single prompt if multi-agent fails
+        response = await ask_ai(f"Direct Advisor: {r.message}")
     
-    # 4. STORE INTERACTION (NEW: Memory system)
-    engine.store_interaction(user_id="default_user", message=r.message, response=response)
-    
-    # 5. PERSIST TO DB (Audit Trial)
+    # 4. PERSIST TO DB (Audit Trial)
     try:
         from database import get_conn
         with get_conn() as conn:
