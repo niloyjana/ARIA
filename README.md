@@ -128,7 +128,8 @@ python start.py
 Open up **`http://localhost:8000`** in your browser and start planning your financial future!
 Open up **`http://localhost:8000`** in your browser and start planning your financial future!
 ---
-###DEMO - aria-xsz3.vercel.app
+###DEMO -
+[aria-xsz3.vercel.app](https://aria-59da-two.vercel.app/)
 ---
 
 ## 🧪 Tech Stack Overview
