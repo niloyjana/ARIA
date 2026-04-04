@@ -18,8 +18,11 @@ const DEFAULT_TRANSACTIONS = [
 
 const appState = {
   // ── Persistent Data ──────────────────────────────────
-  transactions: JSON.parse(localStorage.getItem('aria-transactions')) || DEFAULT_TRANSACTIONS,
+  transactions: (localStorage.getItem('aria-transactions') === null && localStorage.getItem('aria-data-wiped') !== 'true') 
+                ? [...DEFAULT_TRANSACTIONS] 
+                : JSON.parse(localStorage.getItem('aria-transactions') || "[]"),
   activeRole: localStorage.getItem('aria-role') || 'viewer', // 'admin' or 'viewer'
+  dataWiped: localStorage.getItem('aria-data-wiped') === 'true',
   
   currentFilters: {
     search: '',
@@ -36,6 +39,7 @@ const appState = {
   persistState() {
     localStorage.setItem('aria-transactions', JSON.stringify(this.transactions));
     localStorage.setItem('aria-role', this.activeRole);
+    localStorage.setItem('aria-data-wiped', this.dataWiped ? 'true' : 'false');
     console.log("💾 State persisted to LocalStorage.");
   },
 
@@ -43,7 +47,7 @@ const appState = {
    * Resets the entire ledger and storage to mock defaults
    */
   async resetState() {
-    if (confirm("⚠️ This will permanently delete all your changes and reset the dashboard to defaults. Proceed?")) {
+    if (confirm("⚠️ This will permanently delete all your changes and clear the dashboard. Status will stay at 0 until you upload data. Proceed?")) {
       try {
           // Clear backend first
           await fetch('/api/data/transactions', { method: 'DELETE' });
@@ -52,9 +56,8 @@ const appState = {
       }
       
       localStorage.removeItem('aria-transactions');
-      localStorage.removeItem('aria-role');
-      this.transactions = [...DEFAULT_TRANSACTIONS];
-      this.activeRole = 'viewer';
+      this.transactions = [];
+      this.dataWiped = true;
       this.persistState();
       window.location.reload(); 
     }
@@ -143,6 +146,7 @@ const appState = {
         const result = await response.json();
         if (response.ok && result.data) {
             this.transactions = result.data;
+            if (result.data.length > 0) this.dataWiped = false; // Reset wiped flag if real data arrives
             this.persistState();
             console.log(`🏦 State synchronized with backend: ${result.data.length} records.`);
             return true;
