@@ -138,6 +138,14 @@ const appState = {
     }
   },
 
+  forceMockData() {
+    this.transactions = [...DEFAULT_TRANSACTIONS];
+    this.dataWiped = false;
+    localStorage.removeItem('aria-data-wiped');
+    this.persistState();
+    window.location.reload(); 
+  },
+
   setFilter(key, value) {
     if (this.currentFilters.hasOwnProperty(key)) {
       this.currentFilters[key] = value;

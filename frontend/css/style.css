@@ -3722,27 +3722,35 @@ button[onclick="Transactions.wipeAll()"]:hover {
   }
 
   /* Filter Controls - Horizontal Scroll */
-  .filter-controls {
+  .filters-bar {
     display: flex !important;
-    overflow-x: auto;
-    padding: 12px 4px !important;
+    overflow-x: auto !important;
+    padding: 12px 10px !important;
     gap: 10px !important;
-    margin-bottom: 20px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Hide scrollbar Firefox */
+    margin-bottom: 20px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    justify-content: flex-start !important;
   }
 
-  .filter-controls::-webkit-scrollbar {
-    display: none; /* Hide scrollbar Chrome/Safari */
+  .filters-bar::-webkit-scrollbar {
+    display: none !important;
   }
 
+  .filters-bar > div, 
   .filter-group {
-    flex-shrink: 0;
-    min-width: 130px;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    gap: 10px !important;
+    min-width: unset !important;
   }
 
-  .filter-search-group {
-    min-width: 180px;
+  .search-box {
+    min-width: 160px !important;
+  }
+
+  .filter-group select {
+    min-width: 120px !important;
   }
 
   /* Table Responsiveness */
