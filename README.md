@@ -1,95 +1,140 @@
-# 🌌 ARIA — The Smart AI Financial Advisor
+<div align="center">
 
-> **Status:** Premium UI/UX Overhaul Complete | **Local AI:** Integrated (Ollama)
+# 🌌 ARIA <br> <span style="font-size: 0.6em; color: gray;">The Smart AI Financial Advisor</span>
 
-**ARIA** (formerly AI Money Mentor) is a professional-grade, privacy-first financial advisory platform. It combines the power of large language models (LLMs) with a structured financial framework to replace expensive human advisors with precision AI intelligence.
+[![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
+[![Backend](https://img.shields.io/badge/Backend-FastAPI-009688.svg?logo=fastapi)]()
+[![Frontend](https://img.shields.io/badge/Frontend-Vanilla_JS_|_CSS3-f7df1e.svg?logo=javascript)]()
+[![AI Integration](https://img.shields.io/badge/AI-Ollama_|_Groq-blueviolet.svg)]()
 
-![ARIA Dashboard Preview](https://github.com/niloyjana/aria.ai/blob/main/frontend/assets/preview.png?raw=true) *(Note: Add your actual screenshot here!)*
+**A professional-grade, privacy-first AI financial advisory platform built for the modern individual.** 
+*Combining the power of Large Language Models (LLMs) with comprehensive financial frameworks to deliver precision, personalized intelligence.*
+
+![ARIA Dashboard Preview](https://github.com/niloyjana/ARIA/blob/main/frontend/assets/preview.png?raw=true) *(Note: Replace with your actual project screenshot)*
+
+</div>
 
 ---
 
-## ✨ Key Features
+## ⚡ Overview
 
-### 🏦 Specialized AI Toolsets
-- **🔥 FIRE Path Planner**: A complete roadmap to Financial Independence and Early Retirement.
-- **💯 Money Health Score**: 6-dimension wellness audit (Emergency fund, Life/Health Insurance, 80C, Debt).
-- **🧾 Tax Wizard**: Intelligence engine for Old vs New regime comparison and deduction discovery.
-- **💑 Couple's Money Planner**: Optimize HRA, NPS, and SIPs across joint households.
-- **🔬 Portfolio X-Ray**: Deep mutual fund analysis (Overlap, expense drag, rebalancing).
-- **🎯 Life Event Advisor**: Targeted advice for bonus, marriage, inheritance, or new babies.
+**ARIA** is a comprehensive financial planner disguised as an intuitive web app. It replaces generic chatbot interfaces with a robust, tool-driven dashboard. Whether you're planning for early retirement (FIRE), auditing your life insurance, or optimizing your couples' finances, ARIA provides tailored, actionable advice using local or cloud-based AI models.
 
 ### 🛡️ Privacy-First Architecture
-Unlike general-purpose chatbots, ARIA is built for **Local AI Support**. Your sensitive financial data (Net Worth, Income, Goals) remains on your machine when using the **Ollama** backend.
+Your financial data is sensitive. Unlike cloud-only generic tools, ARIA natively supports **Local LLMs** via Ollama. You can run all calculations, inputs, and inference completely offline on your own machine. For unmatched speed and convenience, it also features a seamless fallback to top-tier cloud APIs like **Groq**.
 
-### 🎨 Premium "AI Product" Design
-- **Glassmorphism UI**: Frosted glass effects, glowing borders, and a deep purple-black palette.
-- **Responsive Sidebar**: Collapses into a sleek icon-rail with smart tooltips.
-- **Interactive Dashboard**: Modern SVG-based visuals and data-rich summary cards.
-- **Subtle Micro-animations**: Animated background particles and scroll-reveal effects.
+---
+
+## ✨ Key Features & Toolsets
+
+ARIA provides a suite of specialized calculators and advisors, accessible via a sleek, interactive dashboard:
+
+### 🏦 Financial Intelligence Tools
+- **🔥 FIRE Path Planner:** Receive a strategic roadmap to achieve Financial Independence and Early Retirement based on your savings rate.
+- **💯 Money Health Score:** A 6-dimensional wellness audit (Emergency fund balances, Life/Health coverage adequacy, 80C optimizations, Debt-to-Income).
+- **🧾 Tax Wizard:** An intelligent engine to compare Old vs. New tax regimes and discover hidden deduction opportunities.
+- **💑 Couple's Planner:** Co-manage household finances. Optimize joint HRA, NPS distributions, and concurrent SIPs.
+- **🔬 Portfolio X-Ray:** Deep mutual fund and equity analysis covering overlap risks, expense ratio drag, and custom rebalancing alerts.
+- **🎯 Life Event Advisor:** Hyper-targeted guidance for massive life milestones (receiving a bonus, marriage, inheritance, having a child).
+
+### 🎨 Premium "AI Product" UI/UX
+- **Glassmorphism Aesthetic:** Stunning frosted glass effects, glowing interactive borders, and a sophisticated deep purple-black palette.
+- **Responsive Dynamic Sidebar:** Collapses gracefully into a sleek SVG icon-rail with intelligent tooltips to maximize workspace density.
+- **Modern Interactions:** Smooth CSS-driven micro-animations, animated background particles, and scroll-reveal elements ensuring a fluid user experience.
 
 ---
 
 ## 🛠️ Project Structure
 
-```
-aria.ai/
+Clean separation of frontend interface and backend intelligent routing:
+
+```text
+ARIA/
 ├── backend/
-│   └── server.py        ← FastAPI logic & Financial Prompt Engineering
+│   ├── server.py        # FastAPI logic, endpoints, & Financial Prompt Engineering
+│   └── ...
 ├── frontend/
-│   ├── index.html       ← Core Dashboard & Sidebar UI
-│   ├── css/style.css    ← Premium Design System (CSS3)
-│   └── js/
-│       ├── tools.js     ← Tool Form Definitions & Logic
-│       └── main.js      ← UI & Animation Controller
-├── config.env           ← AI Provider & Local Model Config
-├── requirements.txt     ← Python dependencies
+│   ├── index.html       # Core Dashboard Layout & Sidebar Framework
+│   ├── css/
+│   │   └── style.css    # Premium Custom Design System (CSS3)
+│   ├── js/
+│   │   ├── tools.js     # Tool Configurations, DOM Structures & SVG injection
+│   │   └── main.js      # Global UI Controller, API integration & Animations
+│   └── assets/          # Static assets, local icons, screenshots
+├── config.env           # Environment Variables (Keys, AI Provider Config)
+├── requirements.txt     # Python backend dependencies
+├── start.py             # Global execution script
 └── README.md
 ```
 
 ---
 
-## 🚀 Setup & Installation (3 Steps)
+## 🚀 Setup & Installation
+
+Get your local ARIA instance running in three simple steps:
 
 ### 1. Environment Setup
-Clone the repo and install the Python backend requirements:
+
+Clone the repository and install the backend dependencies. Python 3.10+ is recommended.
+
 ```powershell
+git clone https://github.com/niloyjana/ARIA.git
+cd ARIA
 pip install -r requirements.txt
 ```
 
-### 2. Configure AI Provider
-Open `config.env` and choose your intelligence:
+### 2. Configure Your AI Provider
 
-**Option A: Local AI (Recommended for Privacy)**
-1. Install [Ollama](https://ollama.com).
-2. Run `ollama run llama3.2:1b`.
-3. Set `AI_PROVIDER=local` in `config.env`.
+Open the `config.env` file in the root directory and choose your intelligence engine:
 
-**Option B: Groq (Cloud Fallback - Ultra Fast)**
-1. Get a key from [Groq Console](https://console.groq.com).
-2. Set `AI_PROVIDER=groq` and paste your `GROQ_API_KEY`.
+#### Option A: Local AI (Privacy-First & Recommended)
+1. Download and install [Ollama](https://ollama.com).
+2. Download your preferred model *(e.g., Llama 3 8B or Llama 3.2 1B)*:
+   ```powershell
+   ollama run llama3.2:1b
+   ```
+3. In `config.env`, set your provider to local:
+   ```env
+   AI_PROVIDER=local
+   MODEL_NAME=llama3.2:1b
+   ```
+
+#### Option B: Groq (Cloud Fallback - Ultra Fast)
+1. Obtain an API key from the [Groq Console](https://console.groq.com).
+2. In `config.env`, set your provider and key:
+   ```env
+   AI_PROVIDER=groq
+   GROQ_API_KEY=your_api_key_here
+   ```
 
 ### 3. Launch ARIA
-Start the FastAPI server:
+
+Boot up the ARIA server with a single command:
+
 ```powershell
-# Navigate to backend folder
-cd backend
-python server.py
+python start.py
+# Server will start typically at http://localhost:8000
 ```
-Visit **`http://localhost:8000`** in your browser.
+Open up **`http://localhost:8000`** in your browser and start planning your financial future!
+Open up **`http://localhost:8000`** in your browser and start planning your financial future!
 
 ---
 
-## 🧪 Tech Stack
-- **Backend**: Python 3.10+, FastAPI, Uvicorn.
-- **AI Engine**: Local LLMs (Ollama/Llama 3.2) or Cloud APIs (Groq).
-- **Frontend**: Vanilla HTML5, CSS3 (Custom Design System), JavaScript (ES6+).
-- **Animations**: CSS Keyframes, Intersection Observer API.
+## 🧪 Tech Stack Overview
+
+- **Backend Protocol:** `Python 3.10+`, `FastAPI`, `Uvicorn`
+- **AI Inference Engine:** Local (`Ollama`) / Cloud (`Groq`, `OpenAI`, `Google Generative AI` SDKs included)
+- **Frontend Architecture:** `Vanilla HTML5`, `Modern CSS3` (Custom Theme System), `JavaScript (ES6+)`
+- **UX Ecosystem:** CSS Keyframes, Intersection Observer API, SVG DOM Injection
 
 ---
 
 ## ⚠️ Disclaimer
-ARIA is for educational and informational purposes only. It is not a SEBI-registered investment advisor. Always consult a qualified professional before making major financial decisions.
+
+**ARIA is designed strictly for educational and informational purposes.** It operates on probabilistic LLMs and is **not** a SEBI-registered investment advisor or a certified financial planner. Always consult a qualified, registered financial professional before making major investment, tax, or life decisions based on AI-generated advice.
 
 ---
 
-*Designed & Developed as a Premium AI Product Experiment.* 🌌
+<div align="center">
+  <i>Designed & Developed as a Premium AI Product Experiment.</i> 🌌
+</div>

@@ -12,14 +12,24 @@ const sidebarToggle = document.getElementById("sidebar-toggle");
 const mobileToggle = document.getElementById("mobile-toggle");
 const sidebarOverlay = document.getElementById("sidebar-overlay");
 
+const showBtn = document.getElementById("sidebar-show-btn");
+
 function toggleSidebar() {
   const isMobile = window.innerWidth <= 900;
   if (isMobile) {
     sidebar.classList.toggle("open");
     sidebarOverlay.classList.toggle("active");
   } else {
-    sidebar.classList.toggle("collapsed");
-    mainContent.classList.toggle("rail");
+    const isHidden = sidebar.classList.toggle("fully-hidden");
+    // show/hide the floating restore button
+    if (showBtn) showBtn.style.display = isHidden ? "flex" : "none";
+    // expand/contract main content
+    if (mainContent) mainContent.classList.toggle("expanded", isHidden);
+    // remove collapsed state when restoring
+    if (!isHidden) {
+      sidebar.classList.remove("collapsed");
+      mainContent && mainContent.classList.remove("rail");
+    }
   }
 }
 
@@ -31,6 +41,7 @@ function closeSidebarMobile() {
 if (sidebarToggle) sidebarToggle.addEventListener("click", toggleSidebar);
 if (mobileToggle) mobileToggle.addEventListener("click", toggleSidebar);
 if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebarMobile);
+if (showBtn) showBtn.addEventListener("click", toggleSidebar);
 
 
 
@@ -53,7 +64,16 @@ document.querySelectorAll(".nav-item").forEach(item => {
 // ── Sidebar Navigation Clicks ─────────────────────────────
 document.querySelectorAll(".nav-item").forEach(item => {
   item.addEventListener("click", (e) => {
+    const href = item.getAttribute("href");
+    if (href && href !== "#" && !href.startsWith("javascript:")) {
+      return; // Let the browser handle the link naturally
+    }
+    
+    // Explicitly allow Reset button to trigger its inline onclick
+    if (item.id === "btn-reset-data") return;
+
     e.preventDefault();
+
 
     // Update active state
     document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
@@ -69,13 +89,64 @@ document.querySelectorAll(".nav-item").forEach(item => {
       return;
     }
 
-    // For "coming soon" pages, show a brief toast
+    // For "coming soon" or SPA pages
     const page = item.getAttribute("data-page");
-    if (page && page !== "dashboard") {
-      showComingSoon(item.querySelector(".nav-label")?.textContent || page);
+    if (page) {
+      if (page === "dashboard" || page === "advisor" || page === "transactions" || page === "market-insights") {
+        showView(page);
+      } else {
+        showComingSoon(item.querySelector(".nav-label")?.textContent || page);
+      }
     }
   });
 });
+
+// ── Integrated View Switcher ──────────────────────────────
+function showView(viewName) {
+  // Hide all views
+  document.querySelectorAll(".view-section").forEach(s => s.classList.add("hidden"));
+  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+
+  // Show target view
+  const target = document.getElementById(`${viewName}-view`);
+  if (target) target.classList.remove("hidden");
+
+  // Activate nav item
+  const navItem = document.querySelector(`.nav-item[data-page="${viewName}"]`);
+  if (navItem) navItem.classList.add("active");
+
+  // Re-run UI refresh for dynamic views
+  if (viewName === "dashboard" || viewName === "transactions") {
+    if (typeof Transactions !== 'undefined') Transactions.refreshUI();
+  }
+
+  // Initialize Data Ingestion
+  if (viewName === "data-ingestion") {
+    if (typeof DataIngestion !== 'undefined') {
+        DataIngestion.init();
+    }
+  }
+
+  // Initialize Market Insights
+  if (viewName === "market-insights") {
+    if (typeof MarketInsights !== 'undefined') {
+        MarketInsights.init();
+    }
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Special logic for Advisor
+  if (viewName === "advisor") {
+    document.body.classList.add("active-advisor");
+    initIntegratedParticles();
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    document.body.classList.remove("active-advisor");
+    stopIntegratedParticles();
+  }
+}
 
 // ── Coming Soon Toast ─────────────────────────────────────
 function showComingSoon(name) {
@@ -145,39 +216,216 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
 
 // Observe all scroll-reveal elements once DOM is ready
+// ── Role Switcher Logic ────────────────────────────────────
+function toggleRole() {
+  if (typeof appState === 'undefined') return;
+  const newRole = appState.activeRole === 'admin' ? 'viewer' : 'admin';
+  appState.setRole(newRole);
+  updateRoleUI(newRole);
+}
+
+function updateRoleUI(role) {
+  const nav = document.getElementById("role-switcher-nav");
+  if (!nav) return;
+
+  const is_admin = role === 'admin';
+
+  if (is_admin) {
+    nav.classList.add("is-admin");
+    document.querySelector(".viewer-label")?.classList.remove("active");
+    document.querySelector(".admin-label")?.classList.add("active");
+    document.getElementById("add-txn-btn")?.setAttribute("style", "display:flex;");
+    document.getElementById("btn-reset-data")?.setAttribute("style", "display:flex; color: var(--accent-orange); opacity: 0.8;");
+    document.getElementById("btn-export-main")?.setAttribute("style", "display:flex;");
+  } else {
+    nav.classList.remove("is-admin");
+    document.querySelector(".viewer-label")?.classList.add("active");
+    document.querySelector(".admin-label")?.classList.remove("active");
+    document.getElementById("add-txn-btn")?.setAttribute("style", "display:none;");
+    document.getElementById("btn-reset-data")?.setAttribute("style", "display:none;");
+    document.getElementById("btn-export-main")?.setAttribute("style", "display:none;");
+  }
+
+  // Keep Transactions module in sync
+  if (typeof Transactions !== 'undefined') {
+    Transactions.updateRoleUI();
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("🚀 ARIA Dashboard Ready. Current State:", appState);
+  
+  if (typeof appState !== 'undefined') {
+    updateRoleUI(appState.activeRole);
+  }
+  
+  if (typeof Transactions !== 'undefined') Transactions.init();
+
   document.querySelectorAll(".scroll-reveal").forEach(el => {
     revealObserver.observe(el);
   });
+  
+  // Custom navigation start logic
+  const hash = window.location.hash.replace("#", "");
+  if (hash === "advisor") showView("advisor");
+
+  // Initialize Card Tilt
+  initCardTilt();
 });
+
+
+// ── Integrated AI Advisor Logic ───────────────────────────────
+
+let particleAnimationId = null;
+
+function initIntegratedParticles() {
+  const canvas = document.getElementById("integrated-particle-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const particleCount = 100;
+  
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 2 + 1;
+      this.speedX = Math.random() * 0.5 - 0.25;
+      this.speedY = Math.random() * 0.5 - 0.25;
+      this.color = `rgba(168, 85, 247, ${Math.random() * 0.5 + 0.2})`;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x > canvas.width) this.x = 0;
+      if (this.x < 0) this.x = canvas.width;
+      if (this.y > canvas.height) this.y = 0;
+      if (this.y < 0) this.y = canvas.height;
+    }
+    draw() {
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    // Draw connections
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 100) {
+                ctx.strokeStyle = `rgba(168, 85, 247, ${0.1 * (1 - dist/100)})`;
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.stroke();
+            }
+        }
+    }
+    particleAnimationId = requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+function stopIntegratedParticles() {
+  if (particleAnimationId) cancelAnimationFrame(particleAnimationId);
+}
+
+// ── Integrated RAG Chat Logic ──────────────────────────────────
+let activeDocs = [];
+
+async function sendMessage() {
+  const input = document.getElementById("chat-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  appendMessage("user", text);
+  input.value = "";
+
+  const chatArea = document.getElementById("chat-area");
+  const loadingMsg = appendMessage("ai", '<span class="loading-dots"><span></span><span></span><span></span></span> Thinking...');
+
+  try {
+    const resp = await fetch("/api/advisor/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await resp.json();
+    loadingMsg.remove();
+    appendMessage("ai", data.response);
+  } catch (err) {
+    loadingMsg.remove();
+    appendMessage("ai", "⚠️ Sorry, I encountered an error connecting to the intelligence engine.");
+  }
+}
+
+function appendMessage(role, content) {
+  const area = document.getElementById("chat-area");
+  const div = document.createElement("div");
+  div.className = `message msg-${role}`;
+  div.innerHTML = role === 'ai' ? renderMarkdown(content) : content;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
+
+function handleKeyPress(e) {
+  if (e.key === "Enter") sendMessage();
+}
+
+async function uploadDocument(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const area = document.getElementById("chat-area");
+  const statusMsg = appendMessage("ai", `📤 Uploading <strong>${file.name}</strong>...`);
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const resp = await fetch("/api/advisor/upload", {
+      method: "POST",
+      body: formData
+    });
+    const data = await resp.json();
+    statusMsg.remove();
+    appendMessage("ai", `✅ <strong>${file.name}</strong> indexed successfully! I've added its context to my knowledge base.`);
+    
+    // Add to doc chips
+    const chipContainer = document.getElementById("active-docs");
+    const chip = document.createElement("div");
+    chip.className = "doc-chip";
+    chip.innerHTML = `📄 ${file.name}`;
+    chipContainer.appendChild(chip);
+  } catch (err) {
+    statusMsg.remove();
+    appendMessage("ai", `❌ Failed to upload <strong>${file.name}</strong>.`);
+  }
+}
 
 // ── Status Check removed per user request ──
 
 
-// ── Wallet balance counter animation ─────────────────────────
-function animateWalletCounter() {
-  const el = document.querySelector(".wallet-balance");
-  if (!el) return;
-  let count = 0;
-  const target = 25000;
-  const step = Math.ceil(target / 60);
-  const timer = setInterval(() => {
-    count = Math.min(count + step, target);
-    el.innerHTML = `₹${count.toLocaleString("en-IN")} <span class="wallet-sub">/ advisor fees saved</span>`;
-    if (count >= target) clearInterval(timer);
-  }, 25);
-}
-// Trigger wallet counter when wallet card enters view
-const walletCard = document.querySelector(".wallet-card");
-if (walletCard) {
-  const walletObserver = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
-      setTimeout(animateWalletCounter, 600);
-      walletObserver.disconnect();
-    }
-  }, { threshold: 0.3 });
-  walletObserver.observe(walletCard);
-}
+// Wallet balance counter removed per Priority 2 (centralized in updateDashboard)
+
 
 
 // ── Open Tool Modal ───────────────────────────────────────────
@@ -299,6 +547,11 @@ async function submitTool() {
     if (!el) return;
     payload[f.key] = f.type === "number" ? (parseFloat(el.value) || 0) : el.value;
   });
+  
+  // Custom: Inject transactions for Expense Analyzer
+  if (currentTool === 'expense' && typeof appState !== 'undefined') {
+    payload.transactions = appState.transactions;
+  }
 
   const btn = document.getElementById("submit-btn");
   btn.disabled = true;
@@ -711,7 +964,8 @@ async function updateMarketTicker() {
     const moodClass = data.mood.toLowerCase().includes('greed') || data.mood.toLowerCase().includes('optimistic') ? 'mood-greed' : 
                       (data.mood.toLowerCase().includes('fear') ? 'mood-fear' : 'mood-neutral');
 
-    let indicesHTML = data.indices.map(idx => {
+    // Create the indices HTML
+    const indicesHTML = data.indices.map(idx => {
       const trendClass = idx.trend === 'up' ? 'trend-up' : (idx.trend === 'down' ? 'trend-down' : '');
       const trendIcon = idx.trend === 'up' ? '▲' : (idx.trend === 'down' ? '▼' : '');
       return `
@@ -723,16 +977,34 @@ async function updateMarketTicker() {
       `;
     }).join("");
 
-    ticker.innerHTML = `
-      ${indicesHTML}
+    // Mood Item
+    const moodHTML = `
       <div class="ticker-item" style="margin-left: 15px;">
         <span class="ticker-label">Mood</span>
         <span class="ticker-mood-tag ${moodClass}" style="font-weight:900;">${data.mood}</span>
       </div>
-      <button class="ticker-refresh-btn" onclick="updateMarketTicker()" title="Refresh Market Data">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+    `;
+
+    // To make a seamless loop, we repeat the content once
+    const combinedContent = `${indicesHTML} ${moodHTML}`;
+    
+    ticker.innerHTML = `
+      <div class="ticker-content" id="ticker-track">
+        ${combinedContent} ${combinedContent}
+      </div>
+      <button class="ticker-refresh-btn" onclick="updateMarketTicker()" title="Refresh Market Data" style="position: absolute; right: 10px; z-index: 20; background: rgba(10,8,20,0.8); backdrop-filter: blur(5px);">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
       </button>
     `;
+
+    // Adjust animation speed based on content length
+    const track = document.getElementById('ticker-track');
+    if (track) {
+        const textLength = track.innerText.length;
+        const duration = Math.max(20, textLength / 5); // Responsive speed
+        track.style.animationDuration = `${duration}s`;
+    }
+
   } catch (err) {
     console.error("Ticker fetch error:", err);
   }
@@ -767,39 +1039,78 @@ function attachCursorEvents() {
 function handleCursorEnter() { cursor?.classList.add("hover"); }
 function handleCursorLeave() { cursor?.classList.remove("hover"); }
 
+// ── Smooth Scroll (Lenis) ──────────────────────────────────
+let lenis = null;
+function initSmoothScroll() {
+  lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    gestureOrientation: 'vertical',
+    smoothWheel: true,
+    wheelMultiplier: 1,
+    smoothTouch: false,
+    touchMultiplier: 2,
+    infinite: false,
+  });
+
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  // Connect Lenis to ScrollTrigger
+  if (typeof ScrollTrigger !== 'undefined') {
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  initSmoothScroll();
+  init3DBackground();      // ← New bloom-style background
   attachCursorEvents();
   updateMarketTicker();
-  setInterval(updateMarketTicker, 300000); // Update every 5 minutes
+  initScrollReveal();
+  initCardTilt();
+  if (typeof Transactions !== 'undefined') Transactions.init();
+  setInterval(updateMarketTicker, 300000);
 });
 
-window.addEventListener("scroll", () => {
-  const scrollPx = document.documentElement.scrollTop;
+// ── Optimized GSAP Hero Parallax ─────────────────────────────
+function updateHeroScroll(scrollPx) {
+  const dashboard = document.getElementById('dashboard-view');
+  if (dashboard && !dashboard.classList.contains('hidden')) {
+    const hero = dashboard.querySelector(".hero-inner");
+    if (hero) {
+      const speed = 0.2;
+      hero.style.transform = `perspective(1000px) translate3d(0, ${scrollPx * speed}px, ${-scrollPx * 0.1}px) rotateX(${scrollPx * 0.005}deg)`;
+    }
+  }
 
   // Scroll Progress Bar
+  const scrollProgress = document.getElementById("scroll-progress");
   if (scrollProgress) {
     const winHeightPx = document.documentElement.scrollHeight - document.documentElement.clientHeight;
     const scrolled = winHeightPx > 0 ? (scrollPx / winHeightPx) * 100 : 0;
     scrollProgress.style.width = scrolled + "%";
   }
+}
 
-  // Parallax Hero
-  const heroInner = document.querySelector(".hero-inner");
-  const moneyFloat = document.querySelector(".money-float");
-  const heroStats = document.querySelector(".hero-stats");
-
-  if (heroInner) heroInner.style.transform = `translateY(${scrollPx * 0.25}px)`;
-  if (moneyFloat) moneyFloat.style.transform = `translateY(${scrollPx * 0.45}px)`;
-
-  if (heroStats) {
-    if (scrollPx > 300) {
-      heroStats.classList.add("faded");
-    } else {
-      heroStats.classList.remove("faded");
-    }
-    heroStats.style.opacity = "";
-  }
-});
+// Unified Scroll Handler (Synced with Lenis)
+if (lenis) {
+  lenis.on('scroll', (e) => {
+    updateHeroScroll(e.scroll);
+  });
+} else {
+  window.addEventListener("scroll", () => {
+    updateHeroScroll(window.scrollY);
+  });
+}
 
 // ── Handle window resize for sidebar ──────────────────────────
 window.addEventListener("resize", () => {
@@ -812,3 +1123,251 @@ window.addEventListener("resize", () => {
     mainContent.classList.remove("rail");
   }
 });
+
+// ── Interactive Card Tilt ────────────────────────────────────
+function initCardTilt() {
+  const cards = document.querySelectorAll(".tool-card");
+  
+  cards.forEach(card => {
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left; // x position within the element
+      const y = e.clientY - rect.top;  // y position within the element
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const rotateX = ((y - centerY) / centerY) * -10; // Max 10 degrees
+      const rotateY = ((x - centerX) / centerX) * 10;  // Max 10 degrees
+      
+      requestAnimationFrame(() => {
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+      });
+    });
+    
+    card.addEventListener("mouseleave", () => {
+      requestAnimationFrame(() => {
+        card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+      });
+    });
+  });
+}
+// ── 3D Scroll Trigger Actions ────────────────────────────────
+function initScrollReveal() {
+  const observerOptions = {
+    threshold: 0.15,
+    rootMargin: "0px 0px -50px 0px"
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+        // Optional: stop observing once revealed
+        // observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll(".scroll-reveal").forEach(el => observer.observe(el));
+}
+
+function initHeroParallax() {
+  const hero = document.querySelector(".hero");
+  if (!hero) return;
+
+  hero.addEventListener("mousemove", (e) => {
+    const { clientX, clientY } = e;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    // Calculate tilt (more subtle for landing page feel)
+    const moveX = (clientX - centerX) / centerX;
+    const moveY = (clientY - centerY) / centerY;
+    
+    const elements = hero.querySelectorAll(".wallet-card, .hero-title, .hero-badge");
+    elements.forEach((el, i) => {
+      const depth = (i + 1) * 15;
+      el.style.transform = `perspective(1000px) translate3d(${moveX * depth}px, ${moveY * depth}px, 0) rotateY(${moveX * 5}deg) rotateX(${-moveY * 5}deg)`;
+    });
+  });
+
+  hero.addEventListener("mouseleave", () => {
+    const elements = hero.querySelectorAll(".wallet-card, .hero-title, .hero-badge");
+    elements.forEach(el => {
+      el.style.transform = `translate3d(0, 0, 0) rotateY(0) rotateX(0)`;
+    });
+  });
+}
+
+// ── 3D Background (Bloom-style, ARIA Purple Theme) ────────────
+function init3DBackground() {
+  const canvas = document.querySelector('#bg-wave');
+  if (!canvas || typeof THREE === 'undefined') return;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  camera.position.set(0, 30, 100);
+
+  // ── GRID (animated wave plane) ────────────────────────────
+  const gridGeo = new THREE.PlaneGeometry(300, 300, 80, 80);
+  const gridMat = new THREE.MeshPhongMaterial({
+    color: 0xa855f7,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.13
+  });
+  const grid = new THREE.Mesh(gridGeo, gridMat);
+  grid.rotation.x = -Math.PI / 2;
+  scene.add(grid);
+
+  // ── CANDLESTICKS (financial chart aesthetic) ───────────────
+  const sticksGroup = new THREE.Group();
+  const sticks = [];
+  for (let i = 0; i < 150; i++) {
+    const h = Math.random() * 20 + 2;
+    const stickGeo = new THREE.BoxGeometry(0.4, h, 0.4);
+    const stickMat = new THREE.MeshPhongMaterial({
+      color: Math.random() > 0.35 ? 0xa855f7 : 0x7c3aed,
+      transparent: true,
+      opacity: 0.25
+    });
+    const mesh = new THREE.Mesh(stickGeo, stickMat);
+    mesh.position.set(
+      (Math.random() - 0.5) * 250,
+      h / 2,
+      (Math.random() - 0.5) * 250
+    );
+    sticks.push({ mesh });
+    sticksGroup.add(mesh);
+  }
+  scene.add(sticksGroup);
+
+  // ── PARTICLES ─────────────────────────────────────────────
+  const partsGeo = new THREE.BufferGeometry();
+  const partsCount = 1000;
+  const posArray = new Float32Array(partsCount * 3);
+  for (let i = 0; i < partsCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 400;
+  }
+  partsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  const partsMat = new THREE.PointsMaterial({
+    size: 0.6,
+    color: 0xa855f7,
+    transparent: true,
+    opacity: 0.49
+  });
+  const particles = new THREE.Points(partsGeo, partsMat);
+  scene.add(particles);
+
+  // ── LIGHTING ──────────────────────────────────────────────
+  const light = new THREE.PointLight(0xa855f7, 4.2, 200);
+  light.position.set(0, 50, 20);
+  scene.add(light);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.14));
+
+  // ── SCROLL ANIMATION (GSAP + ScrollTrigger) ───────────────
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Sync ScrollTrigger with Lenis
+  if (typeof lenis !== 'undefined' && lenis) {
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: 'body',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 2
+    }
+  });
+
+  tl.to(camera.position,  { z: 40, y: 10, x: -15 }, 0)
+    .to(camera,           { fov: 110, onUpdate: () => camera.updateProjectionMatrix() }, 0)
+    .to(grid.rotation,    { z: Math.PI / 2 }, 0.2)
+    .to(sticksGroup.position, { y: -30 }, 0.3)
+    .to(particles.position,   { z: 200 }, 0.5)
+    .to(camera.position,  { z: -100, y: 5 }, 0.7)
+    .to(gridMat,          { opacity: 0.37 }, 0.8);
+
+  // ── RENDER LOOP ───────────────────────────────────────────
+  function update() {
+    const time = Date.now() * 0.0003;
+    const pos = grid.geometry.attributes.position.array;
+    for (let i = 0; i < pos.length; i += 3) {
+      pos[i + 2] = Math.sin(pos[i] * 0.05 + time * 10) * 3
+                 + Math.cos(pos[i + 1] * 0.05 + time * 10) * 3;
+    }
+    grid.geometry.attributes.position.needsUpdate = true;
+    sticks.forEach((s, i) => {
+      s.mesh.scale.y = 1 + Math.sin(time * 15 + i) * 0.5;
+    });
+    particles.rotation.y += 0.001;
+  }
+
+  (function animate() {
+    requestAnimationFrame(animate);
+    update();
+    renderer.render(scene, camera);
+  })();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+// ── Global Drag & Drop CSV Import ────────────────────────────
+function initGlobalDragDrop() {
+  const overlay = document.getElementById('drop-overlay');
+  
+  window.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (document.getElementById('transactions-view').classList.contains('hidden') && 
+        document.getElementById('dashboard-view').classList.contains('hidden')) return;
+        
+    overlay?.classList.remove('hidden');
+  });
+
+  window.addEventListener('dragleave', (e) => {
+    if (e.clientX === 0 && e.clientY === 0) { // Check if we left the window
+      overlay?.classList.add('hidden');
+    }
+  });
+
+  overlay?.addEventListener('dragleave', (e) => {
+      overlay?.classList.add('hidden');
+  });
+
+  window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    overlay?.classList.add('hidden');
+    
+    if (e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.name.endsWith('.csv')) {
+        // Use Transactions module to parse
+        if (typeof Transactions !== 'undefined') {
+          const fakeEvent = { target: { files: [file] } };
+          Transactions.importCSV(fakeEvent);
+        }
+      } else {
+        alert("⚠️ ARIA only supports batch imports from CSV files.");
+      }
+    }
+  });
+}
+
+// Call inside DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+    initGlobalDragDrop();
+});
+
