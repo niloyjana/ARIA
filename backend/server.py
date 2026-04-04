@@ -26,6 +26,17 @@ from services.ingestion_service   import ingestion_service
 
 init_db()
 
+# ── Startup Validation ────────────────────────────────────────────────────────
+AI_PROVIDER = os.getenv("AI_PROVIDER", "local").lower()
+if AI_PROVIDER == "groq":
+    key = os.getenv("GROQ_API_KEY", "")
+    if not key or "paste_your_groq_key_here" in key:
+        print("\n" + "!"*60)
+        print("⚠️  CRITICAL CONFIGURATION ERROR: GROQ_API_KEY is missing!")
+        print("   If you want to use Groq AI, add your key to 'config.env'.")
+        print("   Otherwise, set AI_PROVIDER=local in 'config.env'.")
+        print("!"*60 + "\n")
+
 def lakhs(n: float) -> str:
     """Format number in Indian lakhs/crores."""
     if n >= 10_000_000:
@@ -47,6 +58,18 @@ def serve_index(): return FileResponse(str(FRONTEND / "index.html"))
 
 
 # ── AI Client ─────────────────────────────────────────────────────────────────
+
+_local_ai_client = None
+
+def get_local_ai_client():
+    global _local_ai_client
+    if _local_ai_client is None:
+        import openai
+        _local_ai_client = openai.OpenAI(
+            base_url=os.getenv("LOCAL_API_BASE", "http://localhost:11434/v1"),
+            api_key="ollama"
+        )
+    return _local_ai_client
 
 async def ask_ai(prompt: str) -> str:
     provider = os.getenv("AI_PROVIDER", "local").lower()
@@ -79,13 +102,8 @@ async def ask_ai(prompt: str) -> str:
             print(f"❌ AI connection error: {str(e)}")
             raise HTTPException(500, f"AI advice generation failed: {str(e)}")
     elif provider == "local":
-        # Fallback to sync for local if needed, or use a thread for openai client
         import asyncio
-        import openai
-        client = openai.OpenAI(
-            base_url=os.getenv("LOCAL_API_BASE", "http://localhost:11434/v1"),
-            api_key="ollama"
-        )
+        client = get_local_ai_client()
         
         def call_sync():
             resp = client.chat.completions.create(
@@ -446,7 +464,8 @@ def add_networth_entry(r: NetWorthRequest):
             ("networth_entry_created", json.dumps({"assets": r.assets, "liabilities": r.liabilities, "net_worth": nw}))
         )
     
-    return {"net_worth": nw, "message": "Entry stored successfully"}
+    summary = f"Net Worth logged: ₹{nw:,.0f}. Assets: ₹{r.assets:,.0f} | Liabilities: ₹{r.liabilities:,.0f}"
+    return AdviceResponse(advice=summary)
 
 @app.get("/api/networth")
 def get_networth_history():
@@ -535,7 +554,7 @@ def recalculate_risk_profile():
 
 # ── Portfolio Dashboard ───────────────────────────────────────────────────────
 
-@app.get("/api/portfolio/dashboard", response_model=AdviceResponse)
+@app.post("/api/portfolio/dashboard", response_model=AdviceResponse)
 async def get_portfolio_dashboard():
     from calculators.portfolio_dashboard import calculate_portfolio_dashboard
     calc = calculate_portfolio_dashboard()

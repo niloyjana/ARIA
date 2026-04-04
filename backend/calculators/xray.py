@@ -12,11 +12,23 @@ def analyze_portfolio(portfolio_text, horizon, risk_profile, monthly_sip):
     
     for line in lines:
         if not line.strip(): continue
-        # Try to find amount
-        nums = re.findall(r"[\d]+\.?\d*", line.replace(",", ""))
+        # 1. Clean line and find all numbers
+        clean_line = line.replace(",", "")
+        nums = re.findall(r"[\d]+\.?\d*", clean_line)
         if nums:
             amt = float(nums[-1])
-            name = line.split('-')[0].strip() if '-' in line else line.split('₹')[0].strip()
+            # 2. Extract name by splitting or by stripping the amount from the end
+            if '-' in line:
+                name = line.split('-', 1)[0].strip()
+            elif '₹' in line:
+                name = line.split('₹', 1)[0].strip()
+            else:
+                # Fallback: remove the last number (amount) from the line to get the name
+                amount_str = nums[-1]
+                name = clean_line.rsplit(amount_str, 1)[0].strip()
+                # Clean up any trailing non-alphanumeric chars
+                name = re.sub(r'[:\s]+$', '', name)
+            
             extracted.append({"name": name, "amount": amt})
             total_value += amt
 

@@ -136,7 +136,7 @@ class MarketDataService:
             return f"{city} markets leading global recovery. Technical indicators suggest short-term resistance near current levels."
         else:
             if growth_val < 1.0:
-                return f"Structural headwinds in {macro.get('iso', 'the region')} impacting market sentiment. Cautious capital outflows observed."
+                return f"Structural headwinds in {city} impacting market sentiment. Cautious capital outflows observed."
             return f"Volatility spike in {city} index. Recommend defensive positioning until macroeconomic stabilization occurs."
 
     async def _fetch_live_index(self, symbol: str) -> Dict[str, Any]:

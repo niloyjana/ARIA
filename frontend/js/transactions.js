@@ -334,6 +334,7 @@ const Transactions = {
             try {
                 const response = await fetch('/api/data/transactions', { method: 'DELETE' });
                 if (response.ok) {
+                    localStorage.removeItem('aria-transactions');
                     console.log("🗑️ Ledger wiped from backend.");
                     await this.refreshUI();
                     this.populateCategories();

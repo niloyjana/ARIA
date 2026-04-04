@@ -102,6 +102,15 @@ class RAGEngine:
     def store_interaction(self, user_id: str, message: str, response: str):
         """Store a chat interaction as a memory document for future retrieval."""
         self._ensure_initialized()
+        
+        # 1. Check for memory bloat (limit memory documents)
+        if self.vector_store:
+            # This is a very rough check since we don't track types in the index easily
+            # However, for this implementation, we'll just guard against excessive growth
+            if self.vector_store.index.ntotal > 500: # doc chunks + memory
+                 print(f"⚠️ Vector store reached limit ({self.vector_store.index.ntotal}). Skipping interaction storage.")
+                 return
+
         content = f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nUser: {message}\nAssistant: {response}"
         doc = Document(page_content=content, metadata={"source": f"chat_memory_{user_id}", "type": "memory"})
         

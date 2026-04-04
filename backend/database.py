@@ -26,14 +26,6 @@ def init_db():
                 created_at  TEXT DEFAULT CURRENT_TIMESTAMP
             );
 
-            CREATE TABLE IF NOT EXISTS documents (
-                id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                name        TEXT NOT NULL,
-                type        TEXT,
-                content     TEXT,
-                created_at  TEXT DEFAULT CURRENT_TIMESTAMP
-            );
-
             CREATE TABLE IF NOT EXISTS chat_history (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 role        TEXT NOT NULL,
@@ -85,4 +77,7 @@ def init_db():
                 is_processed    INTEGER DEFAULT 0, -- 0=pending, 1=synced to portfolio
                 created_at      TEXT DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE INDEX IF NOT EXISTS idx_ingested_date ON ingested_data(date);
+            CREATE INDEX IF NOT EXISTS idx_ingested_cat ON ingested_data(category);
         """)

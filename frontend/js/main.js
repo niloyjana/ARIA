@@ -1067,6 +1067,11 @@ function initSmoothScroll() {
       lenis.raf(time * 1000);
     });
     gsap.ticker.lagSmoothing(0);
+
+    // Sync Hero Parallax and Progress Bar with Lenis
+    lenis.on('scroll', (e) => {
+      updateHeroScroll(e.scroll);
+    });
   }
 }
 
@@ -1101,14 +1106,11 @@ function updateHeroScroll(scrollPx) {
   }
 }
 
-// Unified Scroll Handler (Synced with Lenis)
-if (lenis) {
-  lenis.on('scroll', (e) => {
-    updateHeroScroll(e.scroll);
-  });
-} else {
+// Unified Scroll Handler (Fallback for non-Lenis)
+if (!lenis) {
   window.addEventListener("scroll", () => {
-    updateHeroScroll(window.scrollY);
+    const scrollPx = window.scrollY;
+    updateHeroScroll(scrollPx);
   });
 }
 
@@ -1273,12 +1275,7 @@ function init3DBackground() {
   // ── SCROLL ANIMATION (GSAP + ScrollTrigger) ───────────────
   gsap.registerPlugin(ScrollTrigger);
 
-  // Sync ScrollTrigger with Lenis
-  if (typeof lenis !== 'undefined' && lenis) {
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
-    gsap.ticker.lagSmoothing(0);
-  }
+  // ScrollTrigger sync already handled in initSmoothScroll
 
   const tl = gsap.timeline({
     scrollTrigger: {
