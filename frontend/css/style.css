@@ -3681,6 +3681,119 @@ button[onclick="Transactions.wipeAll()"]:hover {
   .ingestion-grid { grid-template-columns: 1fr; }
 }
 
+/* 📱 Mobile Responsiveness Overrides (768px and below) */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 100%;
+    --radius: 12px;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 70px 16px 24px !important;
+  }
+
+  /* Header Stacking */
+  .ledger-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .ledger-header .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .view-title {
+    font-size: 28px !important;
+    line-height: 1.2;
+  }
+
+  /* Filter Controls - Horizontal Scroll */
+  .filter-controls {
+    display: flex !important;
+    overflow-x: auto;
+    padding: 12px 4px !important;
+    gap: 10px !important;
+    margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+  }
+
+  .filter-controls::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+  }
+
+  .filter-group {
+    flex-shrink: 0;
+    min-width: 130px;
+  }
+
+  .filter-search-group {
+    min-width: 180px;
+  }
+
+  /* Table Responsiveness */
+  .ledger-card {
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .transactions-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .transactions-table {
+    min-width: 600px; /* Ensure columns have room */
+  }
+
+  .transactions-table th, 
+  .transactions-table td {
+    padding: 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Tool Cards */
+  .tool-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .tool-card {
+    padding: 20px !important;
+  }
+
+  /* Chat Panel */
+  .chat-panel {
+    width: 100% !important;
+    height: 100% !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .chat-content {
+    padding: 12px !important;
+  }
+
+  /* Market Insights */
+  .market-intel-view {
+    padding-top: 60px !important;
+  }
+
+  .market-detail-card {
+    width: calc(100% - 32px);
+    left: 16px !important;
+    bottom: 16px !important;
+  }
+}
+
 
 
 
