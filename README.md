@@ -129,7 +129,7 @@ Open up **`http://localhost:8000`** in your browser and start planning your fina
 Open up **`http://localhost:8000`** in your browser and start planning your financial future!
 ---
 ###DEMO -
-[aria-xsz3.vercel.app](https://aria-59da-two.vercel.app/)
+https://aria-finance.vercel.app/
 ---
 
 ## 🧪 Tech Stack Overview
