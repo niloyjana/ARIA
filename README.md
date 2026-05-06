@@ -11,7 +11,7 @@
 *Combining the power of Large Language Models (LLMs) with comprehensive financial frameworks to deliver precision, personalized intelligence.*
 
 
-<img width="1918" height="908" alt="Screenshot 2026-04-04 222211" src="https://github.com/user-attachments/assets/1d594308-b108-4141-a386-49adc75e71cd" />
+<img width="1918" height="908" alt="Screenshot 2026-04-04 222211" src="https://github.com/user-attachments/assets/1d594308-b108-4141-a386-49adc75e71cd" /> 
 
 </div>
 
