@@ -1,6 +1,6 @@
 <div align="center"> 
 
-# 🌌 ARIA <br> <span style="font-size: 0.6em; color: gray;">The Smart Multi-Agent AI Financial Advisor v3.0</span>
+# 🌌 ARIA <br> <span style="font-size: 0.6em; color: gray;">The Smart Multi-Agent AI Financial Advisor v3.0</span> 
 
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 [![Backend](https://img.shields.io/badge/Backend-FastAPI-009688.svg?logo=fastapi)]()
